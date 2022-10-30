@@ -45,21 +45,30 @@ namespace Pacemaker
             InformationManager.DisplayMessage( new InformationMessage(text, color) );
 
             if (!onlyDisplay)
+            {
                 ToFile(text, isDebug);
+            }
         }
 
         public override void Print(List<string> lines, Color color, bool isDebug = false, bool onlyDisplay = false)
         {
             foreach (string text in lines)
+            {
                 InformationManager.DisplayMessage( new InformationMessage(text, color) );
+            }
 
             if (!onlyDisplay)
+            {
                 ToFile(lines, isDebug);
+            }
         }
 
         public override /* async */ void ToFile(string line, bool isDebug = false)
         {
-            if (Writer is null) return;
+            if (Writer is null)
+            {
+                return;
+            }
 
             _lastMsgWasMultiLine = false;
             Writer.WriteLine(isDebug ? $">> {line}" : line);
@@ -69,7 +78,10 @@ namespace Pacemaker
 
         public override /* async */ void ToFile(List<string> lines, bool isDebug = false)
         {
-            if (Writer is null || lines.Count == 0) return;
+            if (Writer is null || lines.Count == 0)
+            {
+                return;
+            }
 
             if (lines.Count == 1)
             {
@@ -78,12 +90,16 @@ namespace Pacemaker
             }
 
             if (!_lastMsgWasMultiLine)
+            {
                 Writer.WriteLine(isDebug ? BeginMultiLineDebug : BeginMultiLine);
+            }
 
             _lastMsgWasMultiLine = true;
 
             foreach (string line in lines)
+            {
                 Writer.WriteLine(line);
+            }
 
             Writer.WriteLine(EndMultiLine);
             // await Writer.FlushAsync();
@@ -93,7 +109,9 @@ namespace Pacemaker
         public GameLog(string moduleName, bool truncate = false, string? logName = null)
         {
             if (string.IsNullOrEmpty(moduleName))
+            {
                 throw new ArgumentException($"{nameof(moduleName)}: string cannot be null or empty");
+            }
 
             var userDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Mount and Blade II Bannerlord");
 

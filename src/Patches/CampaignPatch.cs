@@ -67,7 +67,9 @@ namespace Pacemaker.Patches
 
             // Find the player character's name
             if (metaData.TryGetValue("CharacterName", out string charName))
+            {
                 trace.Add($"Player character name: \"{charName}\"");
+            }
             else
             {
                 trace.Add($"Entry 'CharacterName' not found in savegame MetaData! Aborting.");
@@ -83,7 +85,9 @@ namespace Pacemaker.Patches
                 return;
             }
             else
+            {
                 trace.Add($"Player clan name: \"{clan.Name}\"");
+            }
 
             // Load external saved values for this campaign (approximately identified by the combo of character name & clan name)
             var esv = Main.ExternalSavedValues.Get(charName, clan.Name.ToString());
@@ -92,8 +96,10 @@ namespace Pacemaker.Patches
             int saveDps = TimeParams.OldDayPerSeason; // vanilla
 
             if (esv is null)
+            {
                 trace.Add("Failed to find associated external saved values. Assuming vanilla savegame " +
                           "(but compromise of the external data store could also be the case).");
+            }
             else
             {
                 trace.Add($"Externally saved values: {esv}\n");
@@ -107,7 +113,9 @@ namespace Pacemaker.Patches
                 Main.SetTimeParams(new TimeParams(saveDps), trace);
             }
             else
+            {
                 trace.Add("Current time parameters already seem appropriate for this save.");
+            }
 
             Util.EventTracer.Trace(trace);
         }

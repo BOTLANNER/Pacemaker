@@ -16,9 +16,13 @@ namespace Pacemaker
             set
             {
                 if (Log is GameLog && !value)
+                {
                     Log = new GameLogBase();
+                }
                 else if (!(Log is GameLog) && value)
+                {
                     Log = new GameLog(Main.Name, truncate: true, logName: "debug");
+                }
             }
         }
 
@@ -41,7 +45,9 @@ namespace Pacemaker
             internal static void Trace(List<string>? extraInfo = null, int framesToSkip = 1)
             {
                 if (!EnableTracer || !EnableLog)
+                {
                     return;
+                }
 
                 var st = new StackTrace(framesToSkip, true);
                 var frames = st.GetFrames();
@@ -96,7 +102,9 @@ namespace Pacemaker
                     });
 
                     if (extraInfo.Count > 1)
+                    {
                         msg.Add(string.Empty);
+                    }
 
                     msg.AddRange(extraInfo);
                 }

@@ -79,7 +79,7 @@ namespace Pacemaker.Patches
         [HarmonyPatch("GetDayOfSeason", MethodType.Getter)]
         static bool GetDayOfSeason(ref int __result, long ____numTicks)
         {
-            __result = (int)((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerSeason);
+            __result = (int) ((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerSeason);
             return false;
         }
 
@@ -87,7 +87,7 @@ namespace Pacemaker.Patches
         [HarmonyPatch("GetDayOfYear", MethodType.Getter)]
         static bool GetDayOfYear(ref int __result, long ____numTicks)
         {
-            __result = (int)((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerYear);
+            __result = (int) ((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerYear);
             return false;
         }
 
@@ -104,7 +104,7 @@ namespace Pacemaker.Patches
         static bool GetSeasonOfYear(ref int __result, long ____numTicks)
         {
             long nSeason = ____numTicks / Main.TimeParam.TickPerSeasonL;
-            __result = (int)(nSeason % TimeParams.SeasonPerYear);
+            __result = (int) (nSeason % TimeParams.SeasonPerYear);
             return false;
         }
 
@@ -119,21 +119,21 @@ namespace Pacemaker.Patches
         /////////////////////////////////////////////////////////////////////////////////////////////
         // Get[UNIT]Of[UNIT]f
 
-        [HarmonyPrefix]
-        [HarmonyPatch("GetDayOfSeasonf", MethodType.Getter)]
-        static bool GetDayOfSeasonf(ref float __result, long ____numTicks)
-        {
-            __result = (float)Math.IEEERemainder(____numTicks / TimeParams.TickPerDayL, Main.TimeParam.DayPerSeason);
-            return false;
-        }
+        //[HarmonyPrefix]
+        //[HarmonyPatch("GetDayOfSeasonf", MethodType.Getter)]
+        //static bool GetDayOfSeasonf(ref float __result, long ____numTicks)
+        //{
+        //    __result = (float) Math.IEEERemainder(____numTicks / TimeParams.TickPerDayL, Main.TimeParam.DayPerSeason);
+        //    return false;
+        //}
 
-        [HarmonyPrefix]
-        [HarmonyPatch("GetSeasonOfYearf", MethodType.Getter)]
-        static bool GetSeasonOfYearf(ref float __result, long ____numTicks)
-        {
-            __result = (float)Math.IEEERemainder(____numTicks / Main.TimeParam.TickPerSeasonL, TimeParams.SeasonPerYear);
-            return false;
-        }
+        //[HarmonyPrefix]
+        //[HarmonyPatch("GetSeasonOfYearf", MethodType.Getter)]
+        //static bool GetSeasonOfYearf(ref float __result, long ____numTicks)
+        //{
+        //    __result = (float) Math.IEEERemainder(____numTicks / Main.TimeParam.TickPerSeasonL, TimeParams.SeasonPerYear);
+        //    return false;
+        //}
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         /* [UNIT]s (factory methods) */
@@ -142,7 +142,7 @@ namespace Pacemaker.Patches
         [HarmonyPatch("Seasons")]
         static bool Seasons(float valueInSeasons, ref CampaignTime __result)
         {
-            __result = CampaignTimeExtensions.Ticks((long)(valueInSeasons * Main.TimeParam.TickPerSeasonF));
+            __result = CampaignTimeExtensions.Ticks((long) (valueInSeasons * Main.TimeParam.TickPerSeasonF));
             return false;
         }
 
@@ -150,7 +150,7 @@ namespace Pacemaker.Patches
         [HarmonyPatch("Years")]
         static bool Years(float valueInYears, ref CampaignTime __result)
         {
-            __result = CampaignTimeExtensions.Ticks((long)(valueInYears * Main.TimeParam.TickPerYearF));
+            __result = CampaignTimeExtensions.Ticks((long) (valueInYears * Main.TimeParam.TickPerYearF));
             return false;
         }
 

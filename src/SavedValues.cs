@@ -18,7 +18,9 @@ namespace Pacemaker
         internal void Snapshot()
         {
             if (DaysPerSeason == default) // Only set this upon first save
+            {
                 DaysPerSeason = Main.TimeParam.DayPerSeason;
+            }
 
             PregnancyDuration = Campaign.Current.Models.PregnancyModel.PregnancyDurationInDays;
 

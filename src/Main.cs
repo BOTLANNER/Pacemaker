@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 
 using HarmonyLib;
 
@@ -14,8 +15,8 @@ namespace Pacemaker
     {
         /* Semantic Versioning (https://semver.org): */
         public static readonly int SemVerMajor = 1;
-        public static readonly int SemVerMinor = 2;
-        public static readonly int SemVerPatch = 8;
+        public static readonly int SemVerMinor = 3;
+        public static readonly int SemVerPatch = 0;
         public static readonly string? SemVerSpecial = null;
         private static readonly string SemVerEnd = (SemVerSpecial is not null) ? "-" + SemVerSpecial : string.Empty;
         public static readonly string Version = $"{SemVerMajor}.{SemVerMinor}.{SemVerPatch}{SemVerEnd}";
@@ -40,6 +41,7 @@ namespace Pacemaker
         {
             new Patches.DefaultMobilePartyFoodConsumptionModelPatch(),
             new Patches.DefaultPregnancyModelPatch(),
+            new Patches.DefaultHeroDeathProbabilityCalculationModelPatch(),
             new Patches.EducationCampaignBehaviorPatch(),
             new Patches.HeroHelperPatch(),
             new Patches.MapTimeTrackerTickPatch(),
@@ -70,9 +72,13 @@ namespace Pacemaker
             var trace = new List<string>();
 
             if (_loaded)
+            {
                 trace.Add("\nModule was already loaded.");
+            }
             else
+            {
                 trace.Add("\nModule is loading for the first time...");
+            }
 
             if (Settings.Instance is not null && Settings.Instance != Settings)
             {

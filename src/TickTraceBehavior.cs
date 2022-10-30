@@ -21,7 +21,9 @@ namespace Pacemaker
         public void OnDailyTickClan(Clan clan)
         {
             if (clan != Clan.PlayerClan)
+            {
                 return;
+            }
 
             Util.EventTracer.Trace($"Fired for Player Clan: {clan.Name}");
         }

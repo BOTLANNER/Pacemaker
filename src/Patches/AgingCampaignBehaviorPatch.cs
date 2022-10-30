@@ -6,7 +6,7 @@ using HarmonyLib;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
-using TaleWorlds.CampaignSystem.SandBox.CampaignBehaviors;
+using TaleWorlds.CampaignSystem.CampaignBehaviors;
 
 namespace Pacemaker.Patches
 {
@@ -15,7 +15,6 @@ namespace Pacemaker.Patches
     {
         internal static class ForOptimizer
         {
-            internal static void WeeklyTick() => AgingCampaignBehaviorPatch.WeeklyTick();
             internal static void DailyTickHero() => AgingCampaignBehaviorPatch.DailyTickHero(null!, null!, null!, null!);
         }
 
@@ -23,10 +22,6 @@ namespace Pacemaker.Patches
         private static readonly Reflect.Method<AgingCampaignBehavior> IsItTimeOfDeathRM = new("IsItTimeOfDeath");
         private static readonly IsItTimeOfDeathDelegate IsItTimeOfDeath = IsItTimeOfDeathRM.GetOpenDelegate<IsItTimeOfDeathDelegate>();
 
-        [HarmonyPrefix]
-        [HarmonyPatch("WeeklyTick")]
-        [MethodImpl(MethodImplOptions.NoOptimization)]
-        private static bool WeeklyTick() => false; // Disabled, as its work is now triggered by FastAgingBehavior.OnDailyTick()
 
         [HarmonyPrefix]
         [HarmonyPriority(Priority.High)]
@@ -41,9 +36,11 @@ namespace Pacemaker.Patches
                child growth stage stuff. */
 
             if (CampaignOptions.IsLifeDeathCycleDisabled)
+            {
                 return false;
+            }
 
-            if (hero.IsAlive && hero.CanDie())
+            if (hero.IsAlive && hero.CanDie(KillCharacterAction.KillCharacterActionDetail.DiedOfOldAge))
             {
                 if (hero.DeathMark != KillCharacterAction.KillCharacterActionDetail.None
                     && (hero.PartyBelongedTo is null
@@ -52,7 +49,9 @@ namespace Pacemaker.Patches
                     KillCharacterAction.ApplyByDeathMark(hero, false);
                 }
                 else
+                {
                     IsItTimeOfDeath(__instance, hero);
+                }
             }
 
             // Mainly, we've removed the whole section on detecting transitions in childhood
@@ -64,9 +63,13 @@ namespace Pacemaker.Patches
             if (____heroesYoungerThanHeroComesOfAge.TryGetValue(hero, out var storedAge) && storedAge != age)
             {
                 if (age >= Campaign.Current.Models.AgeModel.HeroComesOfAge)
+                {
                     ____heroesYoungerThanHeroComesOfAge.Remove(hero);
+                }
                 else
+                {
                     ____heroesYoungerThanHeroComesOfAge[hero] = age;
+                }
             }
 
             if (hero == Hero.MainHero && Hero.IsMainHeroIll && Hero.MainHero.HeroState != Hero.CharacterStates.Dead)
@@ -85,9 +88,13 @@ namespace Pacemaker.Patches
                             --extraLives;
 
                             if (extraLives == 0)
+                            {
                                 ____extraLivesContainer.Remove(Hero.MainHero);
+                            }
                             else
+                            {
                                 ____extraLivesContainer[Hero.MainHero] = extraLives;
+                            }
 
                             return false;
                         }

@@ -129,17 +129,23 @@ namespace Pacemaker
         private List<string> Indent(string unit, uint level, List<string> lines)
         {
             if (unit is null || level == 0)
+            {
                 return lines;
+            }
 
             var indent = string.Empty;
 
             for (uint i = 0; i < level; ++i)
+            {
                 indent += unit;
+            }
 
             List<string> results = new();
 
             foreach (var line in lines)
+            {
                 results.Add(indent + line);
+            }
 
             return results;
         }
@@ -147,12 +153,16 @@ namespace Pacemaker
         private List<string> Indent(string unit, uint level, string line)
         {
             if (unit is null || level == 0)
+            {
                 return new List<string> { line };
+            }
 
             var indent = string.Empty;
 
             for (uint i = 0; i < level; ++i)
+            {
                 indent += unit;
+            }
 
             return new List<string> { indent + line };
         }
@@ -162,8 +172,12 @@ namespace Pacemaker
             var indent = string.Empty;
 
             if (indentSize > 0)
+            {
                 for (int i = 0; i < indentSize; ++i)
+                {
                     indent += " ";
+                }
+            }
 
             uint level = 0;
             var lines = new List<string> { "Time Parameters:" };

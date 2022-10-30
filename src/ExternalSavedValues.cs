@@ -13,7 +13,9 @@ namespace Pacemaker
         internal ExternalSavedValues(string moduleName)
         {
             if (string.IsNullOrEmpty(moduleName))
+            {
                 throw new ArgumentNullException(nameof(moduleName));
+            }
 
             var personalDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             var userDir = Path.Combine(personalDir, "Mount and Blade II Bannerlord");
@@ -21,7 +23,9 @@ namespace Pacemaker
             DataStorePath = Path.Combine(SavesDir, $"{moduleName}.esv.json");
 
             if (!File.Exists(DataStorePath))
+            {
                 return;
+            }
 
             _map = JsonConvert.DeserializeObject<Dictionary<string, SavedValues>>(File.ReadAllText(DataStorePath),
                                                                                   new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace }) ?? new();

@@ -22,7 +22,9 @@ namespace Pacemaker.Patches
             float randDayOfYear = MBRandom.RandomFloatRanged(1, Main.TimeParam.DayPerYear);
 
             if (randDayOfYear > now.GetDayOfYear)
+            {
                 --birthYear;
+            }
 
             __result = CampaignTime.Years(birthYear) + CampaignTime.Days(randDayOfYear);
             return false;

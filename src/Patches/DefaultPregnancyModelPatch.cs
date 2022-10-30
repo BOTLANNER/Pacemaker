@@ -1,4 +1,4 @@
-﻿using TaleWorlds.CampaignSystem.SandBox.GameComponents;
+﻿using TaleWorlds.CampaignSystem.GameComponents;
 
 namespace Pacemaker.Patches
 {
@@ -13,7 +13,9 @@ namespace Pacemaker.Patches
         private static bool PregnancyDurationInDays(ref float __result)
         {
             if (!Main.Settings!.EnablePregnancyTweaks)
+            {
                 return true;
+            }
 
             __result = Main.Settings.ScaledPregnancyDuration * Main.TimeParam.DayPerYear;
             return false;

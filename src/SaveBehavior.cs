@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.SandBox.CampaignBehaviors;
+using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.Core;
+using TaleWorlds.Library;
 
 namespace Pacemaker
 {
@@ -27,7 +28,9 @@ namespace Pacemaker
                 SavedValues.Snapshot();
             }
             else
+            {
                 trace.Add("Loading saved data...");
+            }
 
             dataStore.SyncData("PacemakerSavedValues", ref _savedValues);
             _savedValues ??= new SavedValues();
@@ -35,9 +38,13 @@ namespace Pacemaker
             trace.Add($"Stored values: {SavedValues}");
 
             if (dataStore.IsSaving)
+            {
                 Main.ExternalSavedValues.Serialize();
+            }
             else
+            {
                 OnLoad(isVanilla: false, trace); // Cannot be a vanilla save if SyncData was called on deserialization
+            }
 
             Util.Log.ToFile(trace);
         }
@@ -53,7 +60,9 @@ namespace Pacemaker
             var trace = new List<string>();
 
             if (!HasLoaded) // if SyncData were to be called, it would've been by now
+            {
                 OnLoad(isVanilla: true, trace);
+            }
 
             Util.EventTracer.Trace(trace);
         }
@@ -144,7 +153,9 @@ namespace Pacemaker
 
             // Don't bother if the effective old and new durations barely differ if at all.
             if (Util.NearEqual(oldDuration, newDuration, 1e-3f))
+            {
                 return;
+            }
 
             trace.Add("\nAuto-adjusting in-progress pregnancy due dates due to change in pregnancy duration...\n");
 
