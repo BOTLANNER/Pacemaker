@@ -119,5 +119,28 @@ namespace Pacemaker.Patches
 
             Util.EventTracer.Trace(trace);
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("TickMapTime")]
+        static bool TickMapTime(ref float realDt, ref Campaign __instance)
+        {
+            switch (__instance.TimeControlMode)
+            {
+                case CampaignTimeControlMode.StoppablePlay:
+                case CampaignTimeControlMode.UnstoppablePlay:
+                    {
+                        realDt *= Main.Settings!.PlayTimeMultiplier;
+                        break;
+                    }
+                case CampaignTimeControlMode.UnstoppableFastForward:
+                case CampaignTimeControlMode.UnstoppableFastForwardForPartyWaitTime:
+                case CampaignTimeControlMode.StoppableFastForward:
+                    {
+                        realDt *= Main.Settings!.FastForwardTimeMultiplier;
+                        break;
+                    }
+            }
+            return true;
+        }
     }
 }

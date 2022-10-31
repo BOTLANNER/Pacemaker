@@ -19,6 +19,10 @@ namespace Pacemaker
         private const string TimeMultiplier_Hint = "Multiplies the rate at which campaign time passes. " +
             "Note that the same general pace is maintained: days simply pass more quickly/slowly. [ Default: 1.75 ]";
 
+        private const string PlayTimeMultiplier_Hint = "Multiplies map general pace when playing without fast forward. [ Default: 1.00 ]";
+
+        private const string FastForwardTimeMultiplier_Hint = "Multiplies map general pace when fast forwarding. [ Default: 1.00 ]";
+
         private const string AdultAgeFactor_Hint = "Multiplies the number of effective \"human years\" ADULTS age " +
             "in one calendar year. It's disabled at 100%, but at, e.g., 200%, all ADULT characters age twice as fast. " +
             "[ Default: 200% ]";
@@ -163,11 +167,19 @@ namespace Pacemaker
         [SettingPropertyGroup("General Settings")]
         public float TimeMultiplier { get; set; } = 1.75f;
 
-        [SettingPropertyFloatingInteger("Accelerated Aging Factor (Adults)", 1f, 10f, "#0%", HintText = AdultAgeFactor_Hint, RequireRestart = false, Order = 2)]
+        [SettingPropertyFloatingInteger("Play Time Multiplier", 0.3f, 10f, HintText = PlayTimeMultiplier_Hint, RequireRestart = false, Order = 2)]
+        [SettingPropertyGroup("General Settings")]
+        public float PlayTimeMultiplier { get; set; } = 1.00f;
+
+        [SettingPropertyFloatingInteger("Fast Forward Time Multiplier", 0.3f, 10f, HintText = FastForwardTimeMultiplier_Hint, RequireRestart = false, Order = 3)]
+        [SettingPropertyGroup("General Settings")]
+        public float FastForwardTimeMultiplier { get; set; } = 1.00f;
+
+        [SettingPropertyFloatingInteger("Accelerated Aging Factor (Adults)", 1f, 10f, "#0%", HintText = AdultAgeFactor_Hint, RequireRestart = false, Order = 5)]
         [SettingPropertyGroup("General Settings")]
         public float AdultAgeFactor { get; set; } = 2f;
 
-        [SettingPropertyFloatingInteger("Accelerated Aging Factor (Children)", 1f, 10f, "#0%", HintText = ChildAgeFactor_Hint, RequireRestart = false, Order = 3)]
+        [SettingPropertyFloatingInteger("Accelerated Aging Factor (Children)", 1f, 10f, "#0%", HintText = ChildAgeFactor_Hint, RequireRestart = false, Order = 6)]
         [SettingPropertyGroup("General Settings")]
         public float ChildAgeFactor { get; set; } = 2f;
 
@@ -426,6 +438,8 @@ namespace Pacemaker
             {
                 $"{prefix}{nameof(DaysPerSeason)}           = {DaysPerSeason}",
                 $"{prefix}{nameof(TimeMultiplier)}          = {TimeMultiplier}",
+                $"{prefix}{nameof(PlayTimeMultiplier)}        = {PlayTimeMultiplier}",
+                $"{prefix}{nameof(FastForwardTimeMultiplier)} = {FastForwardTimeMultiplier}",
                 $"{prefix}{nameof(AdultAgeFactor)}          = {AdultAgeFactor}",
                 $"{prefix}{nameof(ChildAgeFactor)}          = {ChildAgeFactor}",
                 $"{prefix}{nameof(EnablePregnancyTweaks)}   = {EnablePregnancyTweaks}",
