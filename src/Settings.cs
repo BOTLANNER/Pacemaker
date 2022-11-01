@@ -8,7 +8,7 @@ using MCM.Abstractions.Base.Global;
 using MCM.Abstractions.Settings.Base.Global;
 #endif
 
-namespace Pacemaker
+namespace TimeLord
 {
     public class Settings : AttributeGlobalSettings<Settings>
     {

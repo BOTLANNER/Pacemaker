@@ -1,9 +1,9 @@
-﻿namespace Pacemaker
+﻿namespace TimeLord
 {
     /* Export
      *
-     * Public interface to other modules for querying Pacemaker's critical information.
-     * Simply intended to be used via reflection upon the Pacemaker assembly.
+     * Public interface to other modules for querying TimeLord's critical information.
+     * Simply intended to be used via reflection upon the TimeLord assembly.
      * Subject to semantic versioning.
      */
     public static class Export
@@ -21,7 +21,7 @@
          *
          * Since children and adults can be configured to age at different rates, an 'isAdult'
          * boolean parameter must be supplied for the hero or set of heroes in question.
-         * Pacemaker adulthood is defined at ages greater than or equal to the age at which
+         * TimeLord adulthood is defined at ages greater than or equal to the age at which
          * children come of age / reach maturity and become active characters.
          */
         public static float GetDaysPerHumanYear(bool isAdult)

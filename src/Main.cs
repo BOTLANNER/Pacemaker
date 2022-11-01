@@ -9,13 +9,13 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
-namespace Pacemaker
+namespace TimeLord
 {
     public class Main : MBSubModuleBase
     {
         /* Semantic Versioning (https://semver.org): */
         public static readonly int SemVerMajor = 1;
-        public static readonly int SemVerMinor = 3;
+        public static readonly int SemVerMinor = 0;
         public static readonly int SemVerPatch = 0;
         public static readonly string? SemVerSpecial = null;
         private static readonly string SemVerEnd = (SemVerSpecial is not null) ? "-" + SemVerSpecial : string.Empty;
@@ -23,7 +23,7 @@ namespace Pacemaker
 
         public static readonly string Name = typeof(Main).Namespace;
         public static readonly string DisplayName = Name; // to be shown to humans in-game
-        public static readonly string HarmonyDomain = "com.zijistark.bannerlord." + Name.ToLower();
+        public static readonly string HarmonyDomain = "com.b0tlanner.bannerlord." + Name.ToLower();
 
         internal static readonly Color ImportantTextColor = Color.FromUint(0x00F16D26); // orange
 

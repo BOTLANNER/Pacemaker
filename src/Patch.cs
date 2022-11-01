@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal class Patch
     {

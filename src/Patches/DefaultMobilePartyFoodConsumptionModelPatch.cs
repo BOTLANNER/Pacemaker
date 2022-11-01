@@ -3,7 +3,7 @@ using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.Localization;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     internal sealed class DefaultMobilePartyFoodConsumptionModelPatch : Patch
     {

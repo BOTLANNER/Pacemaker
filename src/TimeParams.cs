@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal sealed class TimeParams
     {
@@ -236,7 +236,7 @@ namespace Pacemaker
                 $"{nameof(OldTickPerYearL)}   = {OldTickPerYearL}",
             }));
 
-            lines.AddRange(Indent(indent, --level, "Ticks per Unit Ratio (Vanilla to Pacemaker):"));
+            lines.AddRange(Indent(indent, --level, "Ticks per Unit Ratio (Vanilla to TimeLord):"));
 
             lines.AddRange(Indent(indent, ++level, new List<string>
             {

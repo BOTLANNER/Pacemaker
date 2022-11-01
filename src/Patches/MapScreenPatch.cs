@@ -4,7 +4,7 @@ using SandBox.View.Map;
 
 using TaleWorlds.CampaignSystem;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     // Suppport for resuming in fast forward after pausing
     [HarmonyPatch(typeof(MapScreen), "HandleMouse")]

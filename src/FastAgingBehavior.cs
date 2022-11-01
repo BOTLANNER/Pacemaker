@@ -1,4 +1,4 @@
-﻿using Pacemaker.Extensions;
+﻿using TimeLord.Extensions;
 
 using System;
 using System.ComponentModel;
@@ -10,7 +10,7 @@ using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.CampaignSystem.Extensions;
 using TaleWorlds.Core;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal sealed class FastAgingBehavior : CampaignBehaviorBase
     {

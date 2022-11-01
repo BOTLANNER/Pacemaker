@@ -2,7 +2,7 @@
 
 using TaleWorlds.Library;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal class GameLogBase
     {

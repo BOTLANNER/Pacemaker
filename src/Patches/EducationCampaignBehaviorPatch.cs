@@ -3,7 +3,7 @@
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CampaignBehaviors;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     internal sealed class EducationCampaignBehaviorPatch : Patch
     {

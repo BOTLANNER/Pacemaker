@@ -2,7 +2,7 @@
 
 using TaleWorlds.CampaignSystem;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     internal sealed class MapTimeTrackerTickPatch : Patch
     {

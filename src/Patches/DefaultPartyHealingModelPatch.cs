@@ -7,7 +7,7 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.Localization;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     [HarmonyPatch(typeof(DefaultPartyHealingModel))]
     internal static class DefaultPartyHealingModelPatch

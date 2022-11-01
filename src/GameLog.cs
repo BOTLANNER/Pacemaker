@@ -6,7 +6,7 @@ using System.Text;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal sealed class GameLog : GameLogBase
     {

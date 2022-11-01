@@ -1,6 +1,6 @@
 ﻿using TaleWorlds.CampaignSystem;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal sealed class TickTraceBehavior : CampaignBehaviorBase
     {

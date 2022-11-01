@@ -1,6 +1,6 @@
 ﻿using TaleWorlds.CampaignSystem.GameComponents;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     internal sealed class DefaultPregnancyModelPatch : Patch
     {

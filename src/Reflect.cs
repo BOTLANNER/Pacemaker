@@ -4,7 +4,7 @@ using System.Reflection;
 
 using HarmonyLib;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal static class Reflect
     {

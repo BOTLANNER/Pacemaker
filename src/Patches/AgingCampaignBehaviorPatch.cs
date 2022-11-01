@@ -8,7 +8,7 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.CampaignBehaviors;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     [HarmonyPatch(typeof(AgingCampaignBehavior))]
     internal static class AgingCampaignBehaviorPatch

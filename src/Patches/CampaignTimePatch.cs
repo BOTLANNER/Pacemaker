@@ -1,4 +1,4 @@
-﻿using Pacemaker.Extensions;
+﻿using TimeLord.Extensions;
 
 using HarmonyLib;
 
@@ -6,7 +6,7 @@ using System;
 
 using TaleWorlds.CampaignSystem;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     [HarmonyPatch(typeof(CampaignTime))]
     internal static class CampaignTimePatch

@@ -1,11 +1,11 @@
-﻿using Pacemaker.Extensions;
+﻿using TimeLord.Extensions;
 
 using System;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.SaveSystem;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal sealed class SimpleTime
     {

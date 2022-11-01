@@ -2,7 +2,7 @@
 
 using TaleWorlds.Core;
 
-namespace Pacemaker.Extensions
+namespace TimeLord.Extensions
 {
     internal static class EnumerableExtensions
     {

@@ -7,7 +7,7 @@ using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal sealed class SaveBehavior : CampaignBehaviorBase
     {
@@ -32,7 +32,7 @@ namespace Pacemaker
                 trace.Add("Loading saved data...");
             }
 
-            dataStore.SyncData("PacemakerSavedValues", ref _savedValues);
+            dataStore.SyncData("TimeLordSavedValues", ref _savedValues);
             _savedValues ??= new SavedValues();
 
             trace.Add($"Stored values: {SavedValues}");

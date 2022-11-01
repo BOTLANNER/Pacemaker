@@ -4,7 +4,7 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.Library;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     internal sealed class DefaultHeroDeathProbabilityCalculationModelPatch : Patch
     {
@@ -28,7 +28,7 @@ namespace Pacemaker.Patches
                     {
                         float age = 0.3f * ((hero.Age - (float) becomeOldAge) / (float) (Campaign.Current.Models.AgeModel.MaxAge - becomeOldAge));
 
-                        // Transform for Pacemaker age factor
+                        // Transform for TimeLord age factor
                         age *= Main.Settings!.AdultAgeFactor;
 
                         float single1 = 1f - MathF.Pow(1f - age, 0.0119047621f);

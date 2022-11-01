@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 using TaleWorlds.CampaignSystem;
 
-namespace Pacemaker
+namespace TimeLord
 {
     internal static class Util
     {

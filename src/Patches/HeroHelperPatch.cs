@@ -5,7 +5,7 @@ using Helpers;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     internal sealed class HeroHelperPatch : Patch
     {

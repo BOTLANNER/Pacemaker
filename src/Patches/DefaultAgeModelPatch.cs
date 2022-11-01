@@ -1,4 +1,4 @@
-﻿using Pacemaker.Extensions;
+﻿using TimeLord.Extensions;
 
 using HarmonyLib;
 
@@ -7,7 +7,7 @@ using System;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 
-namespace Pacemaker.Patches
+namespace TimeLord.Patches
 {
     [HarmonyPatch(typeof(DefaultAgeModel))]
     internal static class DefaultAgeModelPatch

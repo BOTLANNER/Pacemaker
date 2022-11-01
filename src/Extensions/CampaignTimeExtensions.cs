@@ -4,7 +4,7 @@ using System.Reflection;
 
 using TaleWorlds.CampaignSystem;
 
-namespace Pacemaker.Extensions
+namespace TimeLord.Extensions
 {
     internal static class CampaignTimeExtensions
     {
