@@ -86,3 +86,4 @@ ipch/
 *.vsp
 *.vspx
 *.sap
+/ref

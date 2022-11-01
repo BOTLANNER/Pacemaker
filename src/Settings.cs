@@ -2,7 +2,11 @@
 
 using MCM.Abstractions.Attributes;
 using MCM.Abstractions.Attributes.v2;
+#if MCM_v5
+using MCM.Abstractions.Base.Global;
+#else
 using MCM.Abstractions.Settings.Base.Global;
+#endif
 
 namespace Pacemaker
 {
@@ -64,6 +68,8 @@ namespace Pacemaker
         private const string HeroComesOfAge_Hint = "Age at which a hero comes of age. After this age heroes are eligible and will spawn in the world [ Default: 18 ]";
 
         private const string MaxAge_Hint = "Maximum age for heroes. All heroes will die of old age by this age if they have not died before reaching it [ Default: 128 ]";
+
+        private const string HeroStartingAge_Hint = "Starting age for hero on new campaign [ Default: 22 ]";
 
         private const string EnableAgeOccupationTweaks_Hint = "Adjust age ranges for occupations. [ Default: ON ]";
 
@@ -236,6 +242,9 @@ namespace Pacemaker
         [SettingPropertyGroup("Age Stages")]
         public int MaxAge { get; set; } = 128;
 
+        [SettingPropertyInteger("Hero Starting Age", 1, 1000, HintText = HeroStartingAge_Hint, RequireRestart = false, Order = 7)]
+        [SettingPropertyGroup("Age Stages")]
+        public int HeroStartingAge { get; set; } = 22;
 
         [SettingPropertyBool("Occupation Ages", HintText = EnableAgeOccupationTweaks_Hint, RequireRestart = false, IsToggle = true, Order = 0)]
         [SettingPropertyGroup("Occupation Ages", GroupOrder = 6)]

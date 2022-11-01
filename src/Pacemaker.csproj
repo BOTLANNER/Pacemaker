@@ -17,7 +17,12 @@
   <PropertyGroup>
     <BuildResourcesVersion>1.0.1.80</BuildResourcesVersion>
     <HarmonyVersion>2.2.2</HarmonyVersion>
-    <MCMVersion>4.7.11</MCMVersion>
+    <MCM_V5>true</MCM_V5>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <MCMVersion Condition="$(MCM_V5) == 'true'">5.0.4</MCMVersion>
+    <MCMVersion Condition="$(MCM_V5) != 'true'">4.7.11</MCMVersion>
   </PropertyGroup>
 
   <!-- Game Versions for Stable and Beta -->
@@ -53,7 +58,8 @@
   <!-- STABLE, BETA, and e.g., e156 Constants Defined in Code -->
   <PropertyGroup>
     <GameVersionConstant>e$([System.String]::Copy('$(GameVersion)').Replace('.',''))</GameVersionConstant>
-    <DefineConstants>$(DefineConstants);$(GameVersionConstant)</DefineConstants>
+    <MCMUseConstant Condition="$(MCM_V5) == 'true'">MCM_v5</MCMUseConstant>
+    <DefineConstants>$(DefineConstants);$(GameVersionConstant);$(MCMUseConstant)</DefineConstants>
   </PropertyGroup>
 
   <!-- Extra Substitution Variables to Use in SubModule.xml -->

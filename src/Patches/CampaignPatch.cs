@@ -8,6 +8,7 @@ using System.Reflection;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.SaveSystem;
+using TaleWorlds.Core;
 
 namespace Pacemaker.Patches
 {
@@ -142,5 +143,18 @@ namespace Pacemaker.Patches
             }
             return true;
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("InitializeGamePlayReferences")]
+        static void InitializeGamePlayReferences(ref Campaign __instance)
+        {
+            if (Main.Settings!.EnableAgeStageTweaks)
+            {
+                Game.Current.PlayerTroop.Age = Main.Settings!.HeroStartingAge;
+                CharacterObject.PlayerCharacter.Age = Main.Settings!.HeroStartingAge;
+                CharacterObject.PlayerCharacter.HeroObject.SetBirthDay(CampaignTime.YearsFromNow(-Main.Settings!.HeroStartingAge));
+            }
+        }
+
     }
 }
