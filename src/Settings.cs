@@ -35,6 +35,8 @@ namespace TimeLord
             "applies to children instead. Some might use this to, e.g., make children age faster than adults. " +
             "[ Default: 200% ]";
 
+        private const string CustomSkillGrowth_Hint = "Disables the game's growing up prompts for children in your clan and dynamically updates theirs skills during aging process [ Default: OFF ]";
+
         private const string EnablePregnancyTweaks_Hint = "Adjust the duration of pregnancies. [ Default: ON ]";
 
         private const string ScaledPregnancyDuration_Hint = "Scale pregnancy duration to this proportion of a " +
@@ -188,6 +190,10 @@ namespace TimeLord
         [SettingPropertyFloatingInteger("Accelerated Aging Factor (Children)", 1f, 10f, "#0%", HintText = ChildAgeFactor_Hint, RequireRestart = false, Order = 6)]
         [SettingPropertyGroup("General Settings")]
         public float ChildAgeFactor { get; set; } = 2f;
+
+        [SettingPropertyFloatingInteger("Custom Skill Growth (Children)", 1f, 10f, "#0%", HintText = CustomSkillGrowth_Hint, RequireRestart = true, Order = 7)]
+        [SettingPropertyGroup("General Settings")]
+        public bool CustomSkillGrowth { get; set; } = false;
 
         [SettingPropertyBool("Pregnancy Duration", HintText = EnablePregnancyTweaks_Hint, RequireRestart = false, IsToggle = true, Order = 0)]
         [SettingPropertyGroup("Pregnancy Duration", GroupOrder = 1)]
