@@ -17,33 +17,37 @@ namespace TimeLord.Patches
 
         private static bool CalculateHeroDeathProbabilityInternal(ref float __result, Hero hero)
         {
-            float single = 0f;
-            if (!CampaignOptions.IsLifeDeathCycleDisabled)
+            try
             {
-                int becomeOldAge = Campaign.Current.Models.AgeModel.BecomeOldAge;
-                int maxAge = Campaign.Current.Models.AgeModel.MaxAge - 1;
-                if (hero.Age > (float) becomeOldAge)
+                float single = 0f;
+                if (!CampaignOptions.IsLifeDeathCycleDisabled)
                 {
-                    if (hero.Age < (float) maxAge)
+                    int becomeOldAge = Campaign.Current.Models.AgeModel.BecomeOldAge;
+                    int maxAge = Campaign.Current.Models.AgeModel.MaxAge - 1;
+                    if (hero.Age > (float) becomeOldAge)
                     {
-                        float age = 0.3f * ((hero.Age - (float) becomeOldAge) / (float) (Campaign.Current.Models.AgeModel.MaxAge - becomeOldAge));
+                        if (hero.Age < (float) maxAge)
+                        {
+                            float age = 0.3f * ((hero.Age - (float) becomeOldAge) / (float) (Campaign.Current.Models.AgeModel.MaxAge - becomeOldAge));
 
-                        // Transform for TimeLord age factor
-                        age *= Main.Settings!.AdultAgeFactor;
+                            // Transform for TimeLord age factor
+                            age *= Main.Settings!.AdultAgeFactor;
 
-                        float single1 = 1f - MathF.Pow(1f - age, 0.0119047621f);
-                        single += single1;
-                    }
-                    else if (hero.Age >= (float) maxAge)
-                    {
-                        single += 1f;
+                            float single1 = 1f - MathF.Pow(1f - age, 0.0119047621f);
+                            single += single1;
+                        }
+                        else if (hero.Age >= (float) maxAge)
+                        {
+                            single += 1f;
+                        }
                     }
                 }
-            }
-            __result = single;
+                __result = single;
 
-            // Prevent running default function
-            return false;
+                // Prevent running default function
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
     }
 }

@@ -5,6 +5,7 @@ using HarmonyLib;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
+using TaleWorlds.Library;
 using TaleWorlds.Localization;
 
 namespace TimeLord.Patches
@@ -22,31 +23,38 @@ namespace TimeLord.Patches
              */
             internal static void GetDailyHealing(ref ExplainedNumber __result)
             {
-                if (!Main.Settings!.EnableHealingTweaks || __result.ResultNumber <= 0f)
+                try
                 {
-                    return;
+                    if (!Main.Settings!.EnableHealingTweaks || __result.ResultNumber <= 0f)
+                    {
+                        return;
+                    }
+
+                    // Our factors to apply to [hopefully] final values
+                    float configFactor = Main.Settings.HealingRateFactor;
+                    float timeMultFactor = 1f / (float) Math.Pow(Main.Settings.TimeMultiplier, 0.35);
+
+                    // Healing Rate Adjustment Factor
+                    float newHealFromConfig = __result.ResultNumber * configFactor;
+                    float offsetFromConfig = newHealFromConfig - __result.ResultNumber;
+
+                    if (!Util.NearEqual(offsetFromConfig, 0f, 1e-2f))
+                    {
+                        __result.Add(offsetFromConfig, _configAdjustmentExplanation);
+                    }
+
+                    // Time Multiplier
+                    float newHealFromTimeMult = __result.ResultNumber * timeMultFactor;
+                    float offsetFromTimeMult = newHealFromTimeMult - __result.ResultNumber;
+
+                    if (!Util.NearEqual(offsetFromTimeMult, 0f, 1e-2f))
+                    {
+                        __result.Add(offsetFromTimeMult, _timeMultAdjustmentExplanation);
+                    }
                 }
-
-                // Our factors to apply to [hopefully] final values
-                float configFactor = Main.Settings.HealingRateFactor;
-                float timeMultFactor = 1f / (float)Math.Pow(Main.Settings.TimeMultiplier, 0.35);
-
-                // Healing Rate Adjustment Factor
-                float newHealFromConfig = __result.ResultNumber * configFactor;
-                float offsetFromConfig = newHealFromConfig - __result.ResultNumber;
-
-                if (!Util.NearEqual(offsetFromConfig, 0f, 1e-2f))
+                catch (Exception e)
                 {
-                    __result.Add(offsetFromConfig, _configAdjustmentExplanation);
-                }
-
-                // Time Multiplier
-                float newHealFromTimeMult = __result.ResultNumber * timeMultFactor;
-                float offsetFromTimeMult = newHealFromTimeMult - __result.ResultNumber;
-
-                if (!Util.NearEqual(offsetFromTimeMult, 0f, 1e-2f))
-                {
-                    __result.Add(offsetFromTimeMult, _timeMultAdjustmentExplanation);
+                    Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
                 }
             }
         }
@@ -55,12 +63,31 @@ namespace TimeLord.Patches
         [HarmonyPriority(Priority.Last)]
         [HarmonyPatch("GetDailyHealingForRegulars")]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void GetDailyHealingForRegulars(ref ExplainedNumber __result) => Helpers.GetDailyHealing(ref __result);
+        internal static void GetDailyHealingForRegulars(ref ExplainedNumber __result) {
+            try
+            {
+                Helpers.GetDailyHealing(ref __result);
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+            }    
+        }
 
         [HarmonyPostfix]
         [HarmonyPriority(Priority.Last)]
         [HarmonyPatch("GetDailyHealingHpForHeroes")]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void GetDailyHealingHpForHeroes(ref ExplainedNumber __result) => Helpers.GetDailyHealing(ref __result);
+        internal static void GetDailyHealingHpForHeroes(ref ExplainedNumber __result)
+        {
+            try
+            {
+                Helpers.GetDailyHealing(ref __result);
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+            }
+        }
     }
 }

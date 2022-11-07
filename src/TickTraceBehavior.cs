@@ -1,4 +1,5 @@
 ﻿using TaleWorlds.CampaignSystem;
+using TaleWorlds.Library;
 
 namespace TimeLord
 {
@@ -20,12 +21,19 @@ namespace TimeLord
 
         public void OnDailyTickClan(Clan clan)
         {
-            if (clan != Clan.PlayerClan)
+            try
             {
-                return;
-            }
+                if (clan != Clan.PlayerClan)
+                {
+                    return;
+                }
 
-            Util.EventTracer.Trace($"Fired for Player Clan: {clan.Name}");
+                Util.EventTracer.Trace($"Fired for Player Clan: {clan.Name}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+            }
         }
 
         public void OnHourlyTick() => Util.EventTracer.Trace();

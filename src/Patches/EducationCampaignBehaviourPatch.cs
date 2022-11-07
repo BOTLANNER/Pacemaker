@@ -55,130 +55,138 @@ namespace TimeLord.Patches
         [HarmonyPatch("ChildStateToAge")]
         private static bool ChildStateToAge(ref int __result, object state)
         {
-            if (Main.Settings!.EnableAgeStageTweaks)
+            try
             {
+                if (Main.Settings!.EnableAgeStageTweaks)
+                {
+                    switch ((ChildAgeState) state)
+                    {
+                        case ChildAgeState.Year2:
+                            {
+                                __result = Main.Settings!.BecomeInfantAge > 1 ? Main.Settings!.BecomeInfantAge - 1 : Main.Settings!.BecomeInfantAge;
+                                return false;
+                            }
+                        case ChildAgeState.Year5:
+                            {
+                                __result = Main.Settings!.BecomeChildAge > 1 ? Main.Settings!.BecomeChildAge - 1 : Main.Settings!.BecomeChildAge;
+                                return false;
+                            }
+                        case ChildAgeState.Year8:
+                            {
+                                var teenDiff = Main.Settings!.BecomeTeenagerAge - Main.Settings!.BecomeChildAge;
+                                if (teenDiff >= 3)
+                                {
+
+                                    __result = Main.Settings!.BecomeChildAge + ((int) teenDiff / 3);
+                                }
+                                else if (teenDiff > 1)
+                                {
+                                    __result = Main.Settings!.BecomeChildAge + 1;
+                                }
+                                else
+                                {
+                                    __result = Main.Settings!.BecomeChildAge;
+                                }
+                                return false;
+                            }
+                        case ChildAgeState.Year11:
+                            {
+                                var teenDiff = Main.Settings!.BecomeTeenagerAge - Main.Settings!.BecomeChildAge;
+                                if (teenDiff >= 3)
+                                {
+
+                                    __result = Main.Settings!.BecomeChildAge + (((int) teenDiff / 3) * 2);
+                                }
+                                else if (teenDiff > 2)
+                                {
+                                    __result = Main.Settings!.BecomeChildAge + 2;
+                                }
+                                else if (teenDiff > 1)
+                                {
+                                    __result = Main.Settings!.BecomeChildAge + 1;
+                                }
+                                else
+                                {
+                                    __result = Main.Settings!.BecomeChildAge;
+                                }
+                                return false;
+                            }
+                        case ChildAgeState.Year14:
+                            {
+                                __result = Main.Settings!.BecomeTeenagerAge;
+                                var adultDiff = Main.Settings!.HeroComesOfAge - Main.Settings!.BecomeTeenagerAge;
+                                var teenDiff = Main.Settings!.BecomeTeenagerAge - Main.Settings!.BecomeChildAge;
+                                if (adultDiff < 1 && teenDiff > 0)
+                                {
+                                    __result = Main.Settings!.BecomeTeenagerAge - 1;
+                                }
+                                else
+                                {
+                                    __result = Main.Settings!.BecomeTeenagerAge;
+                                }
+                                return false;
+                            }
+                        case ChildAgeState.Year16:
+                            {
+                                var adultDiff = Main.Settings!.HeroComesOfAge - Main.Settings!.BecomeTeenagerAge;
+                                if (adultDiff > 2)
+                                {
+                                    __result = Main.Settings!.BecomeTeenagerAge + 2;
+                                }
+                                else if (adultDiff > 1)
+                                {
+                                    __result = Main.Settings!.BecomeTeenagerAge + 1;
+                                }
+                                else
+                                {
+                                    __result = Main.Settings!.BecomeTeenagerAge;
+                                }
+                                return false;
+                            }
+                    }
+                }
+
                 switch ((ChildAgeState) state)
                 {
                     case ChildAgeState.Year2:
                         {
-                            __result = Main.Settings!.BecomeInfantAge > 1 ? Main.Settings!.BecomeInfantAge - 1 : Main.Settings!.BecomeInfantAge;
+                            __result = 2;
                             return false;
                         }
                     case ChildAgeState.Year5:
                         {
-                            __result = Main.Settings!.BecomeChildAge > 1 ? Main.Settings!.BecomeChildAge - 1 : Main.Settings!.BecomeChildAge;
+                            __result = 5;
                             return false;
                         }
                     case ChildAgeState.Year8:
                         {
-                            var teenDiff = Main.Settings!.BecomeTeenagerAge - Main.Settings!.BecomeChildAge;
-                            if (teenDiff >= 3)
-                            {
-
-                                __result = Main.Settings!.BecomeChildAge + ((int) teenDiff / 3);
-                            }
-                            else if (teenDiff > 1)
-                            {
-                                __result = Main.Settings!.BecomeChildAge + 1;
-                            }
-                            else
-                            {
-                                __result = Main.Settings!.BecomeChildAge;
-                            }
+                            __result = 8;
                             return false;
                         }
                     case ChildAgeState.Year11:
                         {
-                            var teenDiff = Main.Settings!.BecomeTeenagerAge - Main.Settings!.BecomeChildAge;
-                            if (teenDiff >= 3)
-                            {
-
-                                __result = Main.Settings!.BecomeChildAge + (((int) teenDiff / 3) * 2);
-                            }
-                            else if (teenDiff > 2)
-                            {
-                                __result = Main.Settings!.BecomeChildAge + 2;
-                            }
-                            else if (teenDiff > 1)
-                            {
-                                __result = Main.Settings!.BecomeChildAge + 1;
-                            }
-                            else
-                            {
-                                __result = Main.Settings!.BecomeChildAge;
-                            }
+                            __result = 11;
                             return false;
                         }
                     case ChildAgeState.Year14:
                         {
-                            __result = Main.Settings!.BecomeTeenagerAge;
-                            var adultDiff = Main.Settings!.HeroComesOfAge - Main.Settings!.BecomeTeenagerAge;
-                            var teenDiff = Main.Settings!.BecomeTeenagerAge - Main.Settings!.BecomeChildAge;
-                            if (adultDiff < 1 && teenDiff > 0)
-                            {
-                                __result = Main.Settings!.BecomeTeenagerAge - 1;
-                            }
-                            else
-                            {
-                                __result = Main.Settings!.BecomeTeenagerAge;
-                            }
+                            __result = 14;
                             return false;
                         }
                     case ChildAgeState.Year16:
                         {
-                            var adultDiff = Main.Settings!.HeroComesOfAge - Main.Settings!.BecomeTeenagerAge;
-                            if (adultDiff > 2)
-                            {
-                                __result = Main.Settings!.BecomeTeenagerAge + 2;
-                            }
-                            else if (adultDiff > 1)
-                            {
-                                __result = Main.Settings!.BecomeTeenagerAge + 1;
-                            }
-                            else
-                            {
-                                __result = Main.Settings!.BecomeTeenagerAge;
-                            }
+                            __result = 16;
                             return false;
                         }
                 }
-            } 
-
-            switch ((ChildAgeState) state)
-            {
-                case ChildAgeState.Year2:
-                    {
-                        __result = 2;
-                        return false;
-                    }
-                case ChildAgeState.Year5:
-                    {
-                        __result = 5;
-                        return false;
-                    }
-                case ChildAgeState.Year8:
-                    {
-                        __result = 8;
-                        return false;
-                    }
-                case ChildAgeState.Year11:
-                    {
-                        __result = 11;
-                        return false;
-                    }
-                case ChildAgeState.Year14:
-                    {
-                        __result = 14;
-                        return false;
-                    }
-                case ChildAgeState.Year16:
-                    {
-                        __result = 16;
-                        return false;
-                    }
+                __result = -1;
+                return true;
             }
-            __result = -1;
-            return true;
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         // // Uncomment below for additional debug hits.
@@ -362,7 +370,11 @@ namespace TimeLord.Patches
         [HarmonyPatch("RegisterEvents")]
         private static bool RegisterEvents()
         {
-            return !Main.Settings!.CustomSkillGrowth;
+            try
+            {
+                return !Main.Settings!.CustomSkillGrowth;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
     }
 }

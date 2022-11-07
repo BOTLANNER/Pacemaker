@@ -5,6 +5,7 @@ using HarmonyLib;
 using System;
 
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.Library;
 
 namespace TimeLord.Patches
 {
@@ -22,16 +23,32 @@ namespace TimeLord.Patches
         [HarmonyPatch("ElapsedSeasonsUntilNow", MethodType.Getter)]
         static bool ElapsedSeasonsUntilNow(ref float __result, long ____numTicks)
         {
-            __result = (CurrentTicks() - ____numTicks) / Main.TimeParam.TickPerSeasonF;
-            return false;
+            try
+            {
+                __result = (CurrentTicks() - ____numTicks) / Main.TimeParam.TickPerSeasonF;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("ElapsedYearsUntilNow", MethodType.Getter)]
         static bool ElapsedYearsUntilNow(ref float __result, long ____numTicks)
         {
-            __result = (CurrentTicks() - ____numTicks) / Main.TimeParam.TickPerYearF;
-            return false;
+            try
+            {
+                __result = (CurrentTicks() - ____numTicks) / Main.TimeParam.TickPerYearF;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,16 +58,32 @@ namespace TimeLord.Patches
         [HarmonyPatch("RemainingSeasonsFromNow", MethodType.Getter)]
         static bool RemainingSeasonsFromNow(ref float __result, long ____numTicks)
         {
-            __result = (____numTicks - CurrentTicks()) / Main.TimeParam.TickPerSeasonF;
-            return false;
+            try
+            {
+                __result = (____numTicks - CurrentTicks()) / Main.TimeParam.TickPerSeasonF;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("RemainingYearsFromNow", MethodType.Getter)]
         static bool RemainingYearsFromNow(ref float __result, long ____numTicks)
         {
-            __result = (____numTicks - CurrentTicks()) / Main.TimeParam.TickPerYearF;
-            return false;
+            try
+            {
+                __result = (____numTicks - CurrentTicks()) / Main.TimeParam.TickPerYearF;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,16 +93,32 @@ namespace TimeLord.Patches
         [HarmonyPatch("ToSeasons", MethodType.Getter)]
         static bool ToSeasons(ref double __result, long ____numTicks)
         {
-            __result = ____numTicks / Main.TimeParam.TickPerSeasonD;
-            return false;
+            try
+            {
+                __result = ____numTicks / Main.TimeParam.TickPerSeasonD;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("ToYears", MethodType.Getter)]
         static bool ToYears(ref double __result, long ____numTicks)
         {
-            __result = ____numTicks / Main.TimeParam.TickPerYearD;
-            return false;
+            try
+            {
+                __result = ____numTicks / Main.TimeParam.TickPerYearD;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,16 +128,28 @@ namespace TimeLord.Patches
         [HarmonyPatch("GetDayOfSeason", MethodType.Getter)]
         static bool GetDayOfSeason(ref int __result, long ____numTicks)
         {
-            __result = (int) ((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerSeason);
-            return false;
+            try
+            {
+                __result = (int) ((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerSeason);
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("GetDayOfYear", MethodType.Getter)]
         static bool GetDayOfYear(ref int __result, long ____numTicks)
         {
-            __result = (int) ((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerYear);
-            return false;
+            try
+            {
+                __result = (int) ((____numTicks / TimeParams.TickPerDayL) % Main.TimeParam.DayPerYear);
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
 
         //[HarmonyPrefix]
@@ -103,17 +164,25 @@ namespace TimeLord.Patches
         [HarmonyPatch("GetSeasonOfYear", MethodType.Getter)]
         static bool GetSeasonOfYear(ref int __result, long ____numTicks)
         {
-            long nSeason = ____numTicks / Main.TimeParam.TickPerSeasonL;
-            __result = (int) (nSeason % TimeParams.SeasonPerYear);
-            return false;
+            try
+            {
+                long nSeason = ____numTicks / Main.TimeParam.TickPerSeasonL;
+                __result = (int) (nSeason % TimeParams.SeasonPerYear);
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("GetYear", MethodType.Getter)]
         static bool GetYear(ref int __result, long ____numTicks)
         {
-            __result = (int)(____numTicks / Main.TimeParam.TickPerYearL);
-            return false;
+            try
+            {
+                __result = (int) (____numTicks / Main.TimeParam.TickPerYearL);
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,16 +211,24 @@ namespace TimeLord.Patches
         [HarmonyPatch("Seasons")]
         static bool Seasons(float valueInSeasons, ref CampaignTime __result)
         {
-            __result = CampaignTimeExtensions.Ticks((long) (valueInSeasons * Main.TimeParam.TickPerSeasonF));
-            return false;
+            try
+            {
+                __result = CampaignTimeExtensions.Ticks((long) (valueInSeasons * Main.TimeParam.TickPerSeasonF));
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("Years")]
         static bool Years(float valueInYears, ref CampaignTime __result)
         {
-            __result = CampaignTimeExtensions.Ticks((long) (valueInYears * Main.TimeParam.TickPerYearF));
-            return false;
+            try
+            {
+                __result = CampaignTimeExtensions.Ticks((long) (valueInYears * Main.TimeParam.TickPerYearF));
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,8 +240,12 @@ namespace TimeLord.Patches
         [HarmonyPatch("YearsFromNow")]
         static bool YearsFromNow(float valueInYears, ref CampaignTime __result)
         {
-            __result = CampaignTimeExtensions.Ticks(CurrentTicks() + (long)(valueInYears * Main.TimeParam.TickPerYearF));
-            return false;
+            try
+            {
+                __result = CampaignTimeExtensions.Ticks(CurrentTicks() + (long) (valueInYears * Main.TimeParam.TickPerYearF));
+                return false;
+            }
+            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
         }
     }
 }

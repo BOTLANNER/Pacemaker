@@ -4,6 +4,7 @@ using System;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.SaveSystem;
+using TaleWorlds.Library;
 
 namespace TimeLord
 {
@@ -23,32 +24,47 @@ namespace TimeLord
 
         public SimpleTime(CampaignTime ct)
         {
-            double fracDays = ct.ToDays;
+            try
+            {
+                double fracDays = ct.ToDays;
 
-            Year = ct.GetYear;
-            fracDays -= Year * Main.TimeParam.DayPerYear;
+                Year = ct.GetYear;
+                fracDays -= Year * Main.TimeParam.DayPerYear;
 
-            Season = ct.GetSeasonOfYear;
-            fracDays -= Season * Main.TimeParam.DayPerSeason;
+                Season = ct.GetSeasonOfYear;
+                fracDays -= Season * Main.TimeParam.DayPerSeason;
 
-            Day = ct.GetDayOfSeason;
-            fracDays -= Day;
+                Day = ct.GetDayOfSeason;
+                fracDays -= Day;
 
-            FractionalDay = Math.Min(0.999999, Math.Max(+0.0, fracDays)); // clamp to [+0, 0.999999]
+                FractionalDay = Math.Min(0.999999, Math.Max(+0.0, fracDays)); // clamp to [+0, 0.999999]
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+            }
         }
 
         private bool IsSeasonValid => Season >= 0 && Season < TimeParams.SeasonPerYear;
 
         public override string ToString()
         {
-            // only intended for debugging
-            var ct = CampaignTimeExtensions.DaysD(FractionalDay);
-            var hour = (int)ct.ToHours;
-            var min = (int)ct.ToMinutes % TimeParams.MinPerHour;
-            var sec = (int)ct.ToSeconds % TimeParams.SecPerMin;
-            var season = !IsSeasonValid ? $"[BAD_SEASON: {Season}]" : _seasonNames[Season];
+            try
+            {
+                // only intended for debugging
+                var ct = CampaignTimeExtensions.DaysD(FractionalDay);
+                var hour = (int) ct.ToHours;
+                var min = (int) ct.ToMinutes % TimeParams.MinPerHour;
+                var sec = (int) ct.ToSeconds % TimeParams.SecPerMin;
+                var season = !IsSeasonValid ? $"[BAD_SEASON: {Season}]" : _seasonNames[Season];
 
-            return $"{season} {Day + 1}, {Year} at {hour:D2}:{min:D2}:{sec:D2} ({(100.0 * FractionalDay):F2}% of the day)";
+                return $"{season} {Day + 1}, {Year} at {hour:D2}:{min:D2}:{sec:D2} ({(100.0 * FractionalDay):F2}% of the day)";
+            }
+            catch (Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return base.ToString();
+            }
         }
 
         private static readonly string[] _seasonNames = new[] { "Spring", "Summer", "Autumn", "Winter", };

@@ -4,6 +4,7 @@ using Helpers;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
+using TaleWorlds.Library;
 
 namespace TimeLord.Patches
 {
@@ -17,17 +18,25 @@ namespace TimeLord.Patches
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool GetRandomBirthDayForAge(float age, ref CampaignTime __result)
         {
-            var now = CampaignTime.Now;
-            float birthYear = now.GetYear - age;
-            float randDayOfYear = MBRandom.RandomFloatRanged(1, Main.TimeParam.DayPerYear);
-
-            if (randDayOfYear > now.GetDayOfYear)
+            try
             {
-                --birthYear;
-            }
+                var now = CampaignTime.Now;
+                float birthYear = now.GetYear - age;
+                float randDayOfYear = MBRandom.RandomFloatRanged(1, Main.TimeParam.DayPerYear);
 
-            __result = CampaignTime.Years(birthYear) + CampaignTime.Days(randDayOfYear);
-            return false;
+                if (randDayOfYear > now.GetDayOfYear)
+                {
+                    --birthYear;
+                }
+
+                __result = CampaignTime.Years(birthYear) + CampaignTime.Days(randDayOfYear);
+                return false;
+            }
+            catch (System.Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                return true;
+            }
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
+using TaleWorlds.Library;
+
 namespace TimeLord
 {
     internal sealed class ExternalSavedValues
@@ -12,23 +14,30 @@ namespace TimeLord
 
         internal ExternalSavedValues(string moduleName)
         {
-            if (string.IsNullOrEmpty(moduleName))
+            try
             {
-                throw new ArgumentNullException(nameof(moduleName));
+                if (string.IsNullOrEmpty(moduleName))
+                {
+                    throw new ArgumentNullException(nameof(moduleName));
+                }
+
+                var personalDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                var userDir = Path.Combine(personalDir, "Mount and Blade II Bannerlord");
+                SavesDir = Path.Combine(userDir, "Game Saves");
+                DataStorePath = Path.Combine(SavesDir, $"{moduleName}.esv.json");
+
+                if (!File.Exists(DataStorePath))
+                {
+                    return;
+                }
+
+                _map = JsonConvert.DeserializeObject<Dictionary<string, SavedValues>>(File.ReadAllText(DataStorePath),
+                                                                                      new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace }) ?? new();
             }
-
-            var personalDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            var userDir = Path.Combine(personalDir, "Mount and Blade II Bannerlord");
-            SavesDir = Path.Combine(userDir, "Game Saves");
-            DataStorePath = Path.Combine(SavesDir, $"{moduleName}.esv.json");
-
-            if (!File.Exists(DataStorePath))
+            catch (Exception e)
             {
-                return;
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
             }
-
-            _map = JsonConvert.DeserializeObject<Dictionary<string, SavedValues>>(File.ReadAllText(DataStorePath),
-                                                                                  new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace }) ?? new();
         }
 
         internal void Set(string charName, string clanName, SavedValues savedValues) =>

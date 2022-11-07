@@ -3,6 +3,7 @@
 using SandBox.View.Map;
 
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.Library;
 
 namespace TimeLord.Patches
 {
@@ -12,19 +13,30 @@ namespace TimeLord.Patches
     {
         private static void Postfix(CampaignTimeControlMode __state)
         {
-            if (__state == CampaignTimeControlMode.StoppableFastForward)
+            try
             {
-                Campaign.Current.TimeControlMode = CampaignTimeControlMode.StoppableFastForward;
-            } 
-            else if (__state == CampaignTimeControlMode.UnstoppableFastForward && Campaign.Current != null && Campaign.Current.TimeControlMode == CampaignTimeControlMode.StoppablePlay)
+                if (__state == CampaignTimeControlMode.StoppableFastForward)
+                {
+                    Campaign.Current.TimeControlMode = CampaignTimeControlMode.StoppableFastForward;
+                }
+                else if (__state == CampaignTimeControlMode.UnstoppableFastForward && Campaign.Current != null && Campaign.Current.TimeControlMode == CampaignTimeControlMode.StoppablePlay)
+                {
+                    Campaign.Current.TimeControlMode = CampaignTimeControlMode.StoppableFastForward;
+                }
+            }
+            catch (System.Exception e)
             {
-                Campaign.Current.TimeControlMode = CampaignTimeControlMode.StoppableFastForward;
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
             }
         }
 
         private static void Prefix(ref CampaignTimeControlMode __state)
         {
-            __state = Campaign.Current != null ? Campaign.Current.TimeControlMode : CampaignTimeControlMode.Stop;
+            try
+            {
+                __state = Campaign.Current != null ? Campaign.Current.TimeControlMode : CampaignTimeControlMode.Stop;
+            }
+            catch (System.Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  }
         }
     }
 }

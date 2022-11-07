@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using TaleWorlds.Library;
+
 namespace TimeLord
 {
     internal sealed class TimeParams
@@ -99,31 +101,38 @@ namespace TimeLord
 
         internal TimeParams(int daysPerSeason = OldDayPerSeason)
         {
-            // set appropriate days/week and weeks/season to match requested days/season
-            DayPerSeason = daysPerSeason == 0 ? OldDayPerSeason : daysPerSeason;
+            try
+            {
+                // set appropriate days/week and weeks/season to match requested days/season
+                DayPerSeason = daysPerSeason == 0 ? OldDayPerSeason : daysPerSeason;
 
-            /* special units */
-            DayPerYear = DayPerSeason * SeasonPerYear;
+                /* special units */
+                DayPerYear = DayPerSeason * SeasonPerYear;
 
-            /* ticks per unit */
-            TickPerSeasonL = TickPerDayL * DayPerSeason;
-            TickPerYearL = TickPerSeasonL * SeasonPerYear;
+                /* ticks per unit */
+                TickPerSeasonL = TickPerDayL * DayPerSeason;
+                TickPerYearL = TickPerSeasonL * SeasonPerYear;
 
-            /* ticks per unit, double-precision floating point */
-            TickPerSeasonD = TickPerSeasonL;
-            TickPerYearD = TickPerYearL;
+                /* ticks per unit, double-precision floating point */
+                TickPerSeasonD = TickPerSeasonL;
+                TickPerYearD = TickPerYearL;
 
-            /* ticks per unit, single-precision floating point */
-            TickPerSeasonF = TickPerSeasonL;
-            TickPerYearF = TickPerYearL;
+                /* ticks per unit, single-precision floating point */
+                TickPerSeasonF = TickPerSeasonL;
+                TickPerYearF = TickPerYearL;
 
-            /* ratios of vanilla units to new units, double-precision floating-point */
-            TickRatioSeasonD = OldTickPerSeasonD / TickPerSeasonD;
-            TickRatioYearD = OldTickPerYearD / TickPerYearD;
+                /* ratios of vanilla units to new units, double-precision floating-point */
+                TickRatioSeasonD = OldTickPerSeasonD / TickPerSeasonD;
+                TickRatioYearD = OldTickPerYearD / TickPerYearD;
 
-            /* ratios of vanilla units to new units, single-precision floating-point */
-            TickRatioSeasonF = (float)TickRatioSeasonD;
-            TickRatioYearF = (float)TickRatioYearD;
+                /* ratios of vanilla units to new units, single-precision floating-point */
+                TickRatioSeasonF = (float) TickRatioSeasonD;
+                TickRatioYearF = (float) TickRatioYearD;
+            }
+            catch (System.Exception e)
+            {
+                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+            }
         }
 
         private List<string> Indent(string unit, uint level, List<string> lines)
