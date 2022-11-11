@@ -118,7 +118,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)_Module\SubModule.xml&quot; &quot;$(GameFolder)\Modules\TimeLord\&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)*.dll&quot; &quot;$(GameFolder)\Modules\TimeLord\bin\Win64_Shipping_Client\&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)*.pdb&quot; &quot;$(GameFolder)\Modules\TimeLord\bin\Win64_Shipping_Client\&quot;" />
+    <Exec Command="xcopy /y &quot;$(ProjectDir)_Module\SubModule.xml&quot; &quot;$(GameFolder)\Modules\TimeLord\&quot;&#xD;&#xA;xcopy /y &quot;$(TargetDir)*.dll&quot; &quot;$(GameFolder)\Modules\TimeLord\bin\Win64_Shipping_Client\&quot;&#xD;&#xA;xcopy /y &quot;$(TargetDir)*.pdb&quot; &quot;$(GameFolder)\Modules\TimeLord\bin\Win64_Shipping_Client\&quot;" />
   </Target>
 
 </Project>

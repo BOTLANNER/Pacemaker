@@ -15,7 +15,7 @@
     "MySetup": {
       "commandName": "Executable",
       "executablePath": "$(GameFolder)\\bin\\Win64_Shipping_Client\\Bannerlord.exe",
-      "commandLineArgs": "/singleplayer _MODULES_*Bannerlord.Harmony*BetterExceptionWindow*Bannerlord.ButterLib*Bannerlord.UIExtenderEx*Bannerlord.MBOptionScreen*Native*SandBoxCore*CustomBattle*Sandbox*StoryMode*AnotherAchievementModule*ArrangeMarriageForFamily*AutoTrader*BannerColorPersistence*Bannerlord.Diplomacy*BirthAndDeath*CharacterManager*DedicatedCustomServerHelper*DismembermentPlus*FamilyControl*KillBanditsRaiseRelations*Multiplayer*RighteousExecutions*TimeLord*_MODULES_",
+      "commandLineArgs": "/singleplayer _MODULES_*Bannerlord.Harmony*BetterExceptionWindow*Bannerlord.ButterLib*Bannerlord.UIExtenderEx*Bannerlord.MBOptionScreen*Native*SandBoxCore*CustomBattle*Sandbox*StoryMode*AnotherAchievementModule*ArrangeMarriageForFamily*AutoTrader*BannerColorPersistence*Bannerlord.Diplomacy*BirthAndDeath*CharacterManager*DedicatedCustomServerHelper*DismembermentPlus*FamilyControl*KillBanditsRaiseRelations*Multiplayer*RighteousExecutions*TimeLord*Nepotism*_MODULES_",
       "workingDirectory": "$(GameFolder)\\bin\\Win64_Shipping_Client"
     },
     "QuickStart": {
