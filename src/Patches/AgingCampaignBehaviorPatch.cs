@@ -149,6 +149,7 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
                 Debug.PrintError(e.Message, e.StackTrace);
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 Debug.SetCrashReportCustomString(e.Message);
@@ -194,6 +195,7 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
                 Debug.PrintError(e.Message, e.StackTrace);
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 Debug.SetCrashReportCustomString(e.Message);
@@ -224,6 +226,7 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
                 Debug.PrintError(e.Message, e.StackTrace);
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 Debug.SetCrashReportCustomString(e.Message);

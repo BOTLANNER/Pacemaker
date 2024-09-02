@@ -1,10 +1,10 @@
-﻿using TimeLord.Extensions;
-
-using System;
+﻿using System;
 
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.SaveSystem;
 using TaleWorlds.Library;
+using TaleWorlds.SaveSystem;
+
+using TimeLord.Extensions;
 
 namespace TimeLord
 {
@@ -31,7 +31,7 @@ namespace TimeLord
                 Year = ct.GetYear;
                 fracDays -= Year * Main.TimeParam.DayPerYear;
 
-                Season = ct.GetSeasonOfYear;
+                Season = (int) ct.GetSeasonOfYear;
                 fracDays -= Season * Main.TimeParam.DayPerSeason;
 
                 Day = ct.GetDayOfSeason;
@@ -41,7 +41,11 @@ namespace TimeLord
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
             }
         }
 
@@ -62,7 +66,11 @@ namespace TimeLord
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return base.ToString();
             }
         }

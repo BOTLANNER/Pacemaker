@@ -65,7 +65,7 @@ namespace TimeLord.Patches
             return false;
         }
 
-        public static bool IsTimeToAddNewPregnant(ref object __instance,ref bool __result, ref Dictionary<Hero, object> ___m_prePregnancyInfoMap, Hero mother, Hero father = null)
+        public static bool IsTimeToAddNewPregnant(ref object __instance, ref bool __result, ref Dictionary<Hero, object> ___m_prePregnancyInfoMap, Hero mother, Hero father = null)
         {
             try
             {
@@ -106,7 +106,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return true;
             }
         }
@@ -207,7 +211,7 @@ namespace TimeLord.Patches
 
                 return false;
             }
-            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
+            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
         }
 
         //private static void ConfigStaticCtor()
@@ -249,7 +253,7 @@ namespace TimeLord.Patches
                 }
                 return false;
             }
-            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
+            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
         }
 
         //private static Type TypeResolver(Assembly arg1, string arg2, bool arg3)
@@ -277,9 +281,13 @@ namespace TimeLord.Patches
                 }
                 catch (Exception e)
                 {
-                    Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                    TimeLord.Util.Log.NotifyBad(e.ToString());
+                    Debug.PrintError(e.Message, e.StackTrace);
+                    Debug.WriteDebugLineOnScreen(e.ToString());
+                    Debug.SetCrashReportCustomString(e.Message);
+                    Debug.SetCrashReportCustomStack(e.StackTrace);
                 }
-                
+
             }
 
             internal static bool SameGenderInteractions => (bool) _realType.GetField("SameGenderInteractions", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);

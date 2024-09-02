@@ -54,7 +54,11 @@ namespace TimeLord.Patches
                 }
                 catch (Exception e)
                 {
-                    Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                    TimeLord.Util.Log.NotifyBad(e.ToString());
+                    Debug.PrintError(e.Message, e.StackTrace);
+                    Debug.WriteDebugLineOnScreen(e.ToString());
+                    Debug.SetCrashReportCustomString(e.Message);
+                    Debug.SetCrashReportCustomStack(e.StackTrace);
                 }
             }
         }
@@ -63,15 +67,20 @@ namespace TimeLord.Patches
         [HarmonyPriority(Priority.Last)]
         [HarmonyPatch("GetDailyHealingForRegulars")]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void GetDailyHealingForRegulars(ref ExplainedNumber __result) {
+        internal static void GetDailyHealingForRegulars(ref ExplainedNumber __result)
+        {
             try
             {
                 Helpers.GetDailyHealing(ref __result);
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
-            }    
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+            }
         }
 
         [HarmonyPostfix]
@@ -86,7 +95,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
             }
         }
     }

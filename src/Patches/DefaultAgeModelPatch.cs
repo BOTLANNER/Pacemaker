@@ -1,8 +1,7 @@
-﻿using TimeLord.Extensions;
+﻿
+using System;
 
 using HarmonyLib;
-
-using System;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
@@ -30,7 +29,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return true;
             }
         }
@@ -51,7 +54,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return true;
             }
         }
@@ -69,13 +76,14 @@ namespace TimeLord.Patches
                 __result = Main.Settings!.BecomeOldAge;
                 return false;
             }
-            catch (Exception e) { Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  return true; }
+            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("BecomeTeenagerAge", MethodType.Getter)]
         static bool BecomeTeenagerAge(ref int __result)
-        {try
+        {
+            try
             {
                 if (!Main.Settings!.EnableAgeStageTweaks)
                 {
@@ -90,7 +98,8 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPatch("HeroComesOfAge", MethodType.Getter)]
         static bool HeroComesOfAge(ref int __result)
-        {try
+        {
+            try
             {
                 if (!Main.Settings!.EnableAgeStageTweaks)
                 {
@@ -105,7 +114,8 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPatch("MaxAge", MethodType.Getter)]
         static bool MaxAge(ref int __result)
-        {try
+        {
+            try
             {
                 if (!Main.Settings!.EnableAgeStageTweaks)
                 {
@@ -322,7 +332,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 minimumAge = 18;
                 maximumAge = 128;
                 return true;

@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-using TaleWorlds.Core;
 using TaleWorlds.Library;
 
 namespace TimeLord
 {
     internal sealed class GameLog : GameLogBase
     {
-        private const string BeginMultiLine      = @"=======================================================================================================================\";
+        private const string BeginMultiLine = @"=======================================================================================================================\";
         private const string BeginMultiLineDebug = @"===================================================   D E B U G   =====================================================\";
-        private const string EndMultiLine        = @"=======================================================================================================================/";
+        private const string EndMultiLine = @"=======================================================================================================================/";
 
         public readonly string Module;
         public readonly string LogDir;
@@ -42,7 +41,7 @@ namespace TimeLord
 
         public override void Print(string text, Color color, bool isDebug = false, bool onlyDisplay = false)
         {
-            InformationManager.DisplayMessage( new InformationMessage(text, color) );
+            InformationManager.DisplayMessage(new InformationMessage(text, color));
 
             if (!onlyDisplay)
             {
@@ -54,7 +53,7 @@ namespace TimeLord
         {
             foreach (string text in lines)
             {
-                InformationManager.DisplayMessage( new InformationMessage(text, color) );
+                InformationManager.DisplayMessage(new InformationMessage(text, color));
             }
 
             if (!onlyDisplay)
@@ -125,7 +124,7 @@ namespace TimeLord
 
             try
             {
-                Writer = TextWriter.Synchronized( new StreamWriter(LogPath, !truncate, Encoding.UTF8, (1 << 15)) );
+                Writer = TextWriter.Synchronized(new StreamWriter(LogPath, !truncate, Encoding.UTF8, (1 << 15)));
             }
             catch (Exception e)
             {

@@ -13,7 +13,7 @@ namespace TimeLord
             CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, OnHourlyTick);
         }
 
-        public override void SyncData(IDataStore dataStore)	{ }
+        public override void SyncData(IDataStore dataStore) { }
 
         public void OnWeeklyTick() => Util.EventTracer.Trace();
 
@@ -32,7 +32,11 @@ namespace TimeLord
             }
             catch (System.Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
             }
         }
 

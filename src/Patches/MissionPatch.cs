@@ -1,15 +1,18 @@
 ﻿
-using HarmonyLib;
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+
+using HarmonyLib;
+
+using NetworkMessages.FromServer;
+
 using TaleWorlds.Core;
-using TaleWorlds.MountAndBlade;
 using TaleWorlds.Engine;
 using TaleWorlds.Library;
-using System.Linq;
-using NetworkMessages.FromServer;
+using TaleWorlds.MountAndBlade;
+
 using Debugger = System.Diagnostics.Debugger;
 
 namespace TimeLord.Patches
@@ -43,7 +46,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
             }
         }
 
@@ -98,20 +105,23 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPatch("SpawnAgent")]
 
-        public static bool SpawnAgent(ref Mission __instance, ref Agent __result, AgentBuildData agentBuildData, bool spawnFromAgentVisuals = false, int formationTroopCount = 0)
+
+        public static bool SpawnAgent(ref Mission __instance, ref Agent __result, AgentBuildData agentBuildData, bool spawnFromAgentVisuals = false)
         {
             try
             {
                 Equipment equipmentElement;
-                WorldPosition value;
-                Vec2 direction;
                 WorldPosition worldPosition;
                 Vec2 vec2;
-                Vec3 valueOrDefault;
-                Vec2? agentInitialDirection;
+                int countOfUnits;
+                int agentFormationTroopSpawnCount;
+                WorldPosition worldPosition1;
                 EquipmentElement item;
                 NetworkCommunicator networkPeer;
-                Vec3 groundVec3;
+                int teamIndex;
+                int index;
+                int num;
+                Equipment spawnEquipment;
                 BasicCharacterObject agentCharacter = agentBuildData.AgentCharacter;
                 if (agentCharacter == null)
                 {
@@ -155,60 +165,57 @@ namespace TimeLord.Patches
                 formationPositionPreference.SetClothingColor2(agentBuildData.AgentClothingColor2);
                 formationPositionPreference.SetRandomizeColors(agentBuildData.RandomizeColors);
                 formationPositionPreference.Origin = agentBuildData.AgentOrigin;
-                if (agentBuildData.AgentFormation != null)
+                Formation agentFormation = agentBuildData.AgentFormation;
+                if (agentFormation != null && !agentFormation.HasBeenPositioned)
                 {
-                    Formation agentFormation = agentBuildData.AgentFormation;
-                    FormationClass formationIndex = agentFormation.FormationIndex;
-                    bool flag = (agentBuildData.AgentNoHorses ? false : agentFormation.HasAnyMountedUnit);
-                    if (!agentFormation.HasBeenPositioned)
-                    {
-                        __instance.SpawnFormation(agentFormation);
-                    }
-                    if (!agentBuildData.AgentInitialPosition.HasValue)
-                    {
-                        WorldPosition? nullable = new WorldPosition?(agentFormation.CreateNewOrderWorldPosition(WorldPosition.WorldPositionEnforcedCache.GroundVec3));
-                        Vec2? nullable1 = new Vec2?(agentFormation.Direction);
-                        if (!agentBuildData.AgentSpawnsIntoOwnFormation)
-                        {
-                            int num = (agentBuildData.AgentFormationTroopIndex >= 0 ? agentBuildData.AgentFormationTroopIndex : agentFormation.GroupSpawnIndex);
-                            agentFormation.GroupSpawnIndex++;
-                            __instance.GetFormationSpawnFrame(agentFormation.Team.Side, agentFormation.FormationIndex, agentBuildData.AgentIsReinforcement, out worldPosition, out vec2);
-                            agentFormation.GetUnitSpawnFrameWithIndex(num, worldPosition, vec2, agentFormation.Width, formationTroopCount, agentFormation.UnitSpacing, flag, out nullable, out nullable1);
-                        }
-                        else
-                        {
-                            int countOfUnits = agentFormation.CountOfUnits;
-                            value = nullable.Value;
-                            direction = agentFormation.Direction;
-                            agentFormation.GetUnitSpawnFrameWithIndex(countOfUnits, value, direction, agentFormation.Width, formationTroopCount, agentFormation.UnitSpacing, flag, out nullable, out nullable1);
-                        }
-                        if (nullable.HasValue && agentBuildData.MakeUnitStandOutDistance != 0f)
-                        {
-                            value = nullable.Value;
-                            WorldPosition value1 = nullable.Value;
-                            value.SetVec2(value1.AsVec2 + (nullable1.Value * agentBuildData.MakeUnitStandOutDistance));
-                        }
-                        AgentBuildData agentBuildDatum = agentBuildData;
-                        if (nullable.HasValue)
-                        {
-                            value = nullable.GetValueOrDefault();
-                            groundVec3 = value.GetGroundVec3();
-                        }
-                        else
-                        {
-                            groundVec3 = agentFormation.OrderGroundPosition;
-                        }
-                        valueOrDefault = groundVec3;
-                        AgentBuildData agentBuildDatum1 = agentBuildDatum.InitialPosition(valueOrDefault);
-                        agentInitialDirection = nullable1;
-                        direction = (agentInitialDirection.HasValue ? agentInitialDirection.GetValueOrDefault() : agentFormation.Direction);
-                        agentBuildDatum1.InitialDirection(direction);
-                    }
+                    __instance.SetFormationPositioningFromDeploymentPlan(agentFormation);
                 }
-                valueOrDefault = agentBuildData.AgentInitialPosition.GetValueOrDefault();
-                agentInitialDirection = agentBuildData.AgentInitialDirection;
-                direction = agentInitialDirection.GetValueOrDefault();
-                formationPositionPreference.SetInitialFrame(valueOrDefault, direction);
+
+                MissionDeploymentPlan missionDeploymentPlan = (__instance.DeploymentPlan as MissionDeploymentPlan);
+                if (!agentBuildData.AgentInitialPosition.HasValue)
+                {
+                    BattleSideEnum side = agentBuildData.AgentTeam.Side;
+                    Vec3 invalid = Vec3.Invalid;
+                    Vec2 invalid1 = Vec2.Invalid;
+                    if (agentCharacter == Game.Current.PlayerTroop && missionDeploymentPlan.HasPlayerSpawnFrame(side))
+                    {
+                        missionDeploymentPlan.GetPlayerSpawnFrame(side, out worldPosition, out vec2);
+                        invalid = worldPosition.GetGroundVec3();
+                        invalid1 = vec2;
+                    }
+                    else if (agentFormation == null)
+                    {
+                        __instance.GetFormationSpawnFrame(side, FormationClass.NumberOfAllFormations, agentBuildData.AgentIsReinforcement, out worldPosition1, out invalid1);
+                        invalid = worldPosition1.GetGroundVec3();
+                    }
+                    else
+                    {
+                        if (agentBuildData.AgentSpawnsIntoOwnFormation)
+                        {
+                            countOfUnits = agentFormation.CountOfUnits;
+                            agentFormationTroopSpawnCount = countOfUnits + 1;
+                        }
+                        else if (agentBuildData.AgentFormationTroopSpawnIndex < 0 || agentBuildData.AgentFormationTroopSpawnCount <= 0)
+                        {
+                            countOfUnits = agentFormation.GetNextSpawnIndex();
+                            agentFormationTroopSpawnCount = countOfUnits + 1;
+                        }
+                        else
+                        {
+                            countOfUnits = agentBuildData.AgentFormationTroopSpawnIndex;
+                            agentFormationTroopSpawnCount = agentBuildData.AgentFormationTroopSpawnCount;
+                        }
+                        if (countOfUnits >= agentFormationTroopSpawnCount)
+                        {
+                            agentFormationTroopSpawnCount = countOfUnits + 1;
+                        }
+                        __instance.GetTroopSpawnFrameWithIndex(agentBuildData, countOfUnits, agentFormationTroopSpawnCount, out invalid, out invalid1);
+                    }
+                    agentBuildData.InitialPosition(invalid).InitialDirection(invalid1);
+                }
+                Vec3 valueOrDefault = agentBuildData.AgentInitialPosition.GetValueOrDefault();
+                Vec2 valueOrDefault1 = agentBuildData.AgentInitialDirection.GetValueOrDefault();
+                formationPositionPreference.SetInitialFrame(valueOrDefault, valueOrDefault1, agentBuildData.AgentCanSpawnOutsideOfMissionBoundary);
                 if (agentCharacter.AllEquipments == null)
                 {
                     Debug.Print(String.Concat("characterObject.AllEquipments is null for \"", agentCharacter.StringId, "\"."), 0, Debug.DebugColor.White, 17592186044416L);
@@ -268,13 +275,22 @@ namespace TimeLord.Patches
                 }
                 if (agentCharacter.IsHero)
                 {
+                    ItemObject agentBannerItem = null;
                     item = equipmentElement[EquipmentIndex.ExtraWeaponSlot];
-                    ItemObject itemObject = item.Item ?? agentBuildData.AgentBannerItem;
-                    if (itemObject != null)
+                    ItemObject itemObject = item.Item;
+                    if (itemObject != null && itemObject.IsBannerItem && itemObject.BannerComponent != null)
                     {
+                        agentBannerItem = itemObject;
                         item = new EquipmentElement();
                         equipmentElement[EquipmentIndex.ExtraWeaponSlot] = item;
-                        formationPositionPreference.SetFormationBanner(itemObject);
+                    }
+                    else if (agentBuildData.AgentBannerItem != null)
+                    {
+                        agentBannerItem = agentBuildData.AgentBannerItem;
+                    }
+                    if (agentBannerItem != null)
+                    {
+                        formationPositionPreference.SetFormationBanner(agentBannerItem);
                     }
                 }
                 else if (agentBuildData.AgentBannerItem != null)
@@ -295,6 +311,10 @@ namespace TimeLord.Patches
                         equipmentElement[EquipmentIndex.WeaponItemBeginSlot] = new EquipmentElement(agentBuildData.AgentBannerReplacementWeaponItem, null, null, false);
                     }
                     equipmentElement[EquipmentIndex.ExtraWeaponSlot] = new EquipmentElement(agentBuildData.AgentBannerItem, null, null, false);
+                    if (agentBuildData.AgentOverridenSpawnMissionEquipment != null)
+                    {
+                        agentBuildData.AgentOverridenSpawnMissionEquipment[EquipmentIndex.ExtraWeaponSlot] = new MissionWeapon(agentBuildData.AgentBannerItem, null, agentBuildData.AgentBanner);
+                    }
                 }
                 if (agentBuildData.AgentNoArmor)
                 {
@@ -340,9 +360,8 @@ namespace TimeLord.Patches
                     EquipmentElement equipmentElement1 = equipmentElement[EquipmentIndex.ArmorItemEndSlot];
                     EquipmentElement item2 = equipmentElement[EquipmentIndex.HorseHarness];
                     valueOrDefault = agentBuildData.AgentInitialPosition.GetValueOrDefault();
-                    agentInitialDirection = agentBuildData.AgentInitialDirection;
-                    direction = agentInitialDirection.GetValueOrDefault();
-                    agent = __instance.CreateHorseAgentFromRosterElements(equipmentElement1, item2, ref valueOrDefault, ref direction, agentMountIndex, agentBuildData.AgentMountKey);
+                    valueOrDefault1 = agentBuildData.AgentInitialDirection.GetValueOrDefault();
+                    agent = __instance.CreateHorseAgentFromRosterElements(equipmentElement1, item2, ref valueOrDefault, ref valueOrDefault1, agentMountIndex, agentBuildData.AgentMountKey);
                     Equipment equipment = new Equipment();
                     equipment[EquipmentIndex.ArmorItemEndSlot] = equipmentElement[EquipmentIndex.ArmorItemEndSlot];
                     equipment[EquipmentIndex.HorseHarness] = equipmentElement[EquipmentIndex.HorseHarness];
@@ -360,8 +379,7 @@ namespace TimeLord.Patches
                 if (GameNetwork.IsServerOrRecorder && formationPositionPreference.RiderAgent == null)
                 {
                     Vec3 vec3 = agentBuildData.AgentInitialPosition.GetValueOrDefault();
-                    agentInitialDirection = agentBuildData.AgentInitialDirection;
-                    Vec2 valueOrDefault1 = agentInitialDirection.GetValueOrDefault();
+                    Vec2 vec21 = agentBuildData.AgentInitialDirection.GetValueOrDefault();
                     if (!formationPositionPreference.IsMount)
                     {
                         bool agentMissionPeer = agentBuildData.AgentMissionPeer != null;
@@ -382,29 +400,60 @@ namespace TimeLord.Patches
                             }
                         }
                         NetworkCommunicator networkCommunicator = networkPeer;
+                        bool flag = (formationPositionPreference.MountAgent == null ? false : formationPositionPreference.MountAgent.RiderAgent == formationPositionPreference);
                         GameNetwork.BeginBroadcastModuleEvent();
-                        GameNetwork.WriteMessage(new CreateAgent(formationPositionPreference, agentMissionPeer, vec3, valueOrDefault1, networkCommunicator));
+                        int index1 = formationPositionPreference.Index;
+                        BasicCharacterObject character = formationPositionPreference.Character;
+                        Monster monster = formationPositionPreference.Monster;
+                        Equipment spawnEquipment1 = formationPositionPreference.SpawnEquipment;
+                        MissionEquipment missionEquipment = formationPositionPreference.Equipment;
+                        BodyProperties bodyPropertiesValue = formationPositionPreference.BodyPropertiesValue;
+                        int bodyPropertiesSeed = formationPositionPreference.BodyPropertiesSeed;
+                        bool isFemale = formationPositionPreference.IsFemale;
+                        Team team = formationPositionPreference.Team;
+                        if (team != null)
+                        {
+                            teamIndex = team.TeamIndex;
+                        }
+                        else
+                        {
+                            teamIndex = -1;
+                        }
+                        Formation formation = formationPositionPreference.Formation;
+                        if (formation != null)
+                        {
+                            index = formation.Index;
+                        }
+                        else
+                        {
+                            index = -1;
+                        }
+                        uint clothingColor1 = formationPositionPreference.ClothingColor1;
+                        uint clothingColor2 = formationPositionPreference.ClothingColor2;
+                        num = (flag ? formationPositionPreference.MountAgent.Index : -1);
+                        Agent mountAgent = formationPositionPreference.MountAgent;
+                        if (mountAgent != null)
+                        {
+                            spawnEquipment = mountAgent.SpawnEquipment;
+                        }
+                        else
+                        {
+                            spawnEquipment = null;
+                        }
+                        GameNetwork.WriteMessage(new CreateAgent(index1, character, monster, spawnEquipment1, missionEquipment, bodyPropertiesValue, bodyPropertiesSeed, isFemale, teamIndex, index, clothingColor1, clothingColor2, num, spawnEquipment, agentMissionPeer, vec3, vec21, networkCommunicator));
                         GameNetwork.EndBroadcastModuleEvent(GameNetwork.EventBroadcastFlags.AddToMissionRecord, null);
                     }
                     else
                     {
                         GameNetwork.BeginBroadcastModuleEvent();
-                        GameNetwork.WriteMessage(new CreateFreeMountAgent(formationPositionPreference, vec3, valueOrDefault1));
+                        GameNetwork.WriteMessage(new CreateFreeMountAgent(formationPositionPreference, vec3, vec21));
                         GameNetwork.EndBroadcastModuleEvent(GameNetwork.EventBroadcastFlags.AddToMissionRecord, null);
                     }
                 }
-                MultiplayerMissionAgentVisualSpawnComponent missionBehavior = Mission.Current.GetMissionBehavior<MultiplayerMissionAgentVisualSpawnComponent>();
+                MultiplayerMissionAgentVisualSpawnComponent missionBehavior = __instance.GetMissionBehavior<MultiplayerMissionAgentVisualSpawnComponent>();
                 if (missionBehavior != null && agentBuildData.AgentMissionPeer != null && agentBuildData.AgentMissionPeer.IsMine && agentBuildData.AgentVisualsIndex == 0)
                 {
-                    try
-                    {
-                        missionBehavior.OnMyAgentSpawned();
-                    }
-                    catch (Exception exception)
-                    {
-                        Debug.Print("OnMyAgentSpawnedFromVisual exception", 0, Debug.DebugColor.White, 17592186044416L);
-                        Debug.Print(exception.ToString(), 0, Debug.DebugColor.White, 17592186044416L);
-                    }
+                    missionBehavior.OnMyAgentSpawned();
                 }
                 if (agent != null)
                 {
@@ -444,13 +493,13 @@ namespace TimeLord.Patches
                 formationPositionPreference.AgentVisuals.CheckResources(true);
                 if (formationPositionPreference.IsAIControlled)
                 {
-                    if (agent != null)
-                    {
-                        formationPositionPreference.SetRidingOrder(1);
-                    }
-                    else
+                    if (agent == null)
                     {
                         formationPositionPreference.SetAgentFlags(formationPositionPreference.GetAgentFlags() & (AgentFlag.Mountable | AgentFlag.CanJump | AgentFlag.CanRear | AgentFlag.CanAttack | AgentFlag.CanDefend | AgentFlag.RunsAwayWhenHit | AgentFlag.CanCharge | AgentFlag.CanBeCharged | AgentFlag.CanClimbLadders | AgentFlag.CanBeInGroup | AgentFlag.CanSprint | AgentFlag.IsHumanoid | AgentFlag.CanGetScared | AgentFlag.CanWieldWeapon | AgentFlag.CanCrouch | AgentFlag.CanGetAlarmed | AgentFlag.CanWander | AgentFlag.CanKick | AgentFlag.CanRetreat | AgentFlag.MoveAsHerd | AgentFlag.MoveForwardOnly | AgentFlag.IsUnique | AgentFlag.CanUseAllBowsMounted | AgentFlag.CanReloadAllXBowsMounted | AgentFlag.CanDeflectArrowsWith2HSword));
+                    }
+                    else if (formationPositionPreference.Formation == null)
+                    {
+                        formationPositionPreference.SetRidingOrder(RidingOrder.RidingOrderEnum.Mount);
                     }
                 }
                 __result = formationPositionPreference;
@@ -459,10 +508,15 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return true;
             }
         }
+
 
         [HarmonyPrefix]
         [HarmonyPatch("BuildAgent")]
@@ -488,10 +542,10 @@ namespace TimeLord.Patches
                 agent.InitializeAgentRecord();
                 agent.AgentVisuals.BatchLastLodMeshes();
                 agent.PreloadForRendering();
-                ActionIndexCache currentAction = agent.GetCurrentAction(0);
-                if (currentAction != ActionIndexCache.act_none)
+                ActionIndexValueCache currentActionValue = agent.GetCurrentActionValue(0);
+                if (currentActionValue != ActionIndexValueCache.act_none)
                 {
-                    agent.SetActionChannel(0, currentAction, false, (ulong) 0, 0f, 1f, -0.2f, 0.4f, MBRandom.RandomFloat * 0.8f, false, -0.2f, 0, true);
+                    agent.SetActionChannel(0, currentActionValue, false, (ulong) 0, 0f, 1f, -0.2f, 0.4f, MBRandom.RandomFloat * 0.8f, false, -0.2f, 0, true);
                 }
                 agent.InitializeComponents();
                 if (agent.Controller == Agent.ControllerType.Player)
@@ -508,7 +562,11 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return true;
             }
         }

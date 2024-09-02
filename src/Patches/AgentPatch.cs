@@ -1,7 +1,7 @@
 ﻿
-using HarmonyLib;
-
 using System.Reflection;
+
+using HarmonyLib;
 
 using TaleWorlds.Core;
 using TaleWorlds.Library;
@@ -20,7 +20,7 @@ namespace TimeLord.Patches
 
         [HarmonyPrefix]
         [HarmonyPatch("UpdateSpawnEquipmentAndRefreshVisuals")]
-        public static bool UpdateSpawnEquipmentAndRefreshVisuals(ref Agent __instance,Equipment newSpawnEquipment)
+        public static bool UpdateSpawnEquipmentAndRefreshVisuals(ref Agent __instance, Equipment newSpawnEquipment)
         {
             try
             {
@@ -54,7 +54,11 @@ namespace TimeLord.Patches
             }
             catch (System.Exception e)
             {
-                Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return true;
             }
         }

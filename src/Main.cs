@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 
 using HarmonyLib;
 
@@ -37,6 +40,8 @@ namespace TimeLord
 
         private readonly bool EnableTickTracer = false;
 
+        private List<Exception> SetupExceptions = new List<Exception>();
+
         static Main()
         {
             try
@@ -56,7 +61,11 @@ namespace TimeLord
             }
             catch (System.Exception e)
             {
-                TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
             }
 
         }
@@ -89,12 +98,51 @@ namespace TimeLord
                 }
 
                 Util.Log.ToFile("\nApplying standard Harmony patches in bulk...");
-                Harmony.PatchAll();
+                try
+                {
+                    Harmony.PatchAll();
+                }
+                catch (System.Exception ex)
+                {
+                    Util.Log.NotifyBad("\nTimeLord: Patch all failed, attempting one by one...");
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var types = AccessTools.GetTypesFromAssembly(assembly);
+                    for (int i = 0; i < types.Length; i++)
+                    {
+                        try
+                        {
+                            var type = types[i];
+                            Harmony.CreateClassProcessor(type).Patch();
+                        }
+                        catch (Exception e)
+                        {
+                            if (Debugger.IsAttached)
+                            {
+                                Debugger.Break();
+                            }
+                            SetupExceptions.Add(e);
+                            Util.Log.NotifyBad($"\nTimeLord: {e.Message}");
+                            Debug.PrintError(e.Message, e.StackTrace);
+                            Debug.WriteDebugLineOnScreen(e.ToString());
+                            Debug.SetCrashReportCustomString(e.Message);
+                            Debug.SetCrashReportCustomStack(e.StackTrace);
+                        }
+                    }
+
+                }
                 Util.Log.ToFile("Done.");
             }
             catch (System.Exception e)
             {
-                TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
             }
         }
 
@@ -140,10 +188,22 @@ namespace TimeLord
                 }
 
                 Util.Log.ToFile(trace);
+
+
+                if (SetupExceptions.Any())
+                {
+                    throw new AggregateException("TimeLord: Started with errors", SetupExceptions);
+                }
             }
             catch (System.Exception e)
             {
-                TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.ToFile(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+
+                TimeLord.Util.Log.NotifyBad(e.Message);
+                Debug.WriteDebugLineOnScreen(e.Message);
             }
         }
 
@@ -162,7 +222,7 @@ namespace TimeLord
 
                 Util.EventTracer.Trace(trace);
             }
-            catch (System.Exception e) { TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  }
+            catch (System.Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); }
         }
 
         private void AddBehaviors(CampaignGameStarter gameInitializer, List<string> trace)
@@ -178,7 +238,7 @@ namespace TimeLord
                     trace.Add($"Behavior added: {typeof(TickTraceBehavior).FullName}");
                 }
             }
-            catch (System.Exception e) { TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  }
+            catch (System.Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); }
         }
 
         internal static TimeParams SetTimeParams(TimeParams newParams, List<string> trace)
@@ -197,7 +257,11 @@ namespace TimeLord
             }
             catch (System.Exception e)
             {
-                TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); 
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
                 return TimeParam;
             }
         }
@@ -217,7 +281,7 @@ namespace TimeLord
                     Util.EventTracer.Trace(trace);
                 }
             }
-            catch (System.Exception e) { TaleWorlds.Library.Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString());  Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace);  }
+            catch (System.Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); }
         }
 
         private bool _loaded;
