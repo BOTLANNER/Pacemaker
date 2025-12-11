@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 using HarmonyLib;
 
@@ -6,20 +7,29 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.Library;
 
+// Comment out if other code is uncommented
+//using TaleWorlds.Localization;
+//using TaleWorlds.CampaignSystem.MapNotificationTypes;
+//using System.Collections.Generic;
+//using TaleWorlds.CampaignSystem.Actions;
+//using TaleWorlds.Core;
+//using TaleWorlds.CampaignSystem.Extensions;
+//using TaleWorlds.CampaignSystem.MapEvents;
+
 namespace TimeLord.Patches
 {
     [HarmonyPatch(typeof(EducationCampaignBehavior))]
     internal static class EducationCampaignBehaviourPatch
     {
         private static readonly System.Type ChildAgeStateT;
-        private static readonly Reflect.Method DoStage;
-        private static readonly Reflect.Method GetStage;
+        private static readonly MethodInfo DoStageMethod;
+        private static readonly MethodInfo GetStageMethod;
 
         static EducationCampaignBehaviourPatch()
         {
             ChildAgeStateT = typeof(EducationCampaignBehavior).Assembly.GetType("TaleWorlds.CampaignSystem.CampaignBehaviors.EducationCampaignBehavior+ChildAgeState");
-            DoStage = new(typeof(EducationCampaignBehavior), "DoStage");
-            GetStage = new(typeof(EducationCampaignBehavior), "GetStage", new[] { typeof(Hero), ChildAgeStateT });
+            DoStageMethod = AccessTools.Method(typeof(EducationCampaignBehavior), "DoStage");
+            GetStageMethod = AccessTools.Method(typeof(EducationCampaignBehavior), "GetStage", new[] { typeof(Hero), ChildAgeStateT });
         }
 
         private enum ChildAgeState : short
@@ -194,8 +204,8 @@ namespace TimeLord.Patches
         //    {
         //        if (i != (short) (ChildAgeState.Invalid | ChildAgeState.Year5 | ChildAgeState.Year8 | ChildAgeState.Year11 | ChildAgeState.Year14 | ChildAgeState.Year16 | ChildAgeState.Count | ChildAgeState.Last))
         //        {
-        //            object stage = GetStage.MethodInfo.Invoke(__instance, new object[] { child, i });
-        //            DoStage.MethodInfo.Invoke(__instance, new[] { child, stage });
+        //            object stage = GetStageMethod.Invoke(__instance, new object[] { child, i });
+        //            DoStageMethod.Invoke(__instance, new[] { child, stage });
         //        }
         //    }
         //    return false;
@@ -363,7 +373,15 @@ namespace TimeLord.Patches
             {
                 return !Main.Settings!.CustomSkillGrowth;
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
     }
 }

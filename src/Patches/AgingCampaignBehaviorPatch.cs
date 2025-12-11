@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using HarmonyLib;
@@ -25,8 +26,7 @@ namespace TimeLord.Patches
         }
 
         private delegate void IsItTimeOfDeathDelegate(AgingCampaignBehavior instance, Hero hero);
-        private static readonly Reflect.Method<AgingCampaignBehavior> IsItTimeOfDeathRM = new("IsItTimeOfDeath");
-        private static readonly IsItTimeOfDeathDelegate IsItTimeOfDeath = IsItTimeOfDeathRM.GetOpenDelegate<IsItTimeOfDeathDelegate>();
+        private static readonly MethodInfo IsItTimeOfDeathMethod = AccessTools.Method(typeof(AgingCampaignBehavior), "IsItTimeOfDeath");
 
 
         [HarmonyPrefix]
@@ -51,14 +51,14 @@ namespace TimeLord.Patches
                 if (hero.IsAlive && hero.CanDie(KillCharacterAction.KillCharacterActionDetail.DiedOfOldAge))
                 {
                     if (hero.DeathMark != KillCharacterAction.KillCharacterActionDetail.None
-                        && (hero.PartyBelongedTo is null
-                            || (hero.PartyBelongedTo.MapEvent is null && hero.PartyBelongedTo.SiegeEvent is null)))
+                    && (hero.PartyBelongedTo is null
+                        || (hero.PartyBelongedTo.MapEvent is null && hero.PartyBelongedTo.SiegeEvent is null)))
                     {
                         KillCharacterAction.ApplyByDeathMark(hero, false);
                     }
                     else
                     {
-                        IsItTimeOfDeath(__instance, hero);
+                        IsItTimeOfDeathMethod.Invoke(__instance, new object[] { hero });
                     }
                 }
 
@@ -140,6 +140,7 @@ namespace TimeLord.Patches
                             }
 
                             Campaign.Current.TimeControlMode = CampaignTimeControlMode.Stop;
+                            Hero.MainHero.AddDeathMark(null, KillCharacterAction.KillCharacterActionDetail.DiedOfOldAge);
                             KillCharacterAction.ApplyByOldAge(Hero.MainHero, true);
                         }
                     }
@@ -208,16 +209,20 @@ namespace TimeLord.Patches
             try
             {
                 var skill = Skills.All
-                        .Where(s => child.GetAttributeValue(s.CharacterAttribute) < 3)
+                        .Where(s => child.GetSkillValue(s) < 3)
                         .RandomPick();
 
-                if (skill is null)
+                var attribute = Attributes.All
+                        .Where(s => child.GetAttributeValue(s) < 3)
+                        .RandomPick();
+
+                if (skill is null || attribute is null)
                 {
                     return;
                 }
 
                 child.HeroDeveloper.ChangeSkillLevel(skill, MBRandom.RandomInt(4, 6), false);
-                child.HeroDeveloper.AddAttribute(skill.CharacterAttribute, 1, false);
+                child.HeroDeveloper.AddAttribute(attribute, 1, false);
 
                 if (child.HeroDeveloper.CanAddFocusToSkill(skill))
                 {

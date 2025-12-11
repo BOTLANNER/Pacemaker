@@ -1,4 +1,6 @@
-﻿using TaleWorlds.CampaignSystem;
+﻿using HarmonyLib;
+
+using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.Library;
@@ -6,15 +8,14 @@ using TaleWorlds.Localization;
 
 namespace TimeLord.Patches
 {
-    internal sealed class DefaultMobilePartyFoodConsumptionModelPatch : Patch
+    [HarmonyPatch(typeof(DefaultMobilePartyFoodConsumptionModel))]
+    internal sealed class DefaultMobilePartyFoodConsumptionModelPatch
     {
-        internal DefaultMobilePartyFoodConsumptionModelPatch()
-            : base(Type.Postfix, TargetMethod, PatchMethod, HarmonyLib.Priority.Last) { }
-
-        private static readonly Reflect.Method<DefaultMobilePartyFoodConsumptionModel> TargetMethod = new("CalculateDailyFoodConsumptionf");
-        private static readonly Reflect.Method<DefaultMobilePartyFoodConsumptionModelPatch> PatchMethod = new(nameof(CalculateDailyFoodConsumptionf));
         private static readonly TextObject Explanation = new($"[{Main.DisplayName}] Time Multiplier");
 
+        [HarmonyPatch(nameof(CalculateDailyFoodConsumptionf))]
+        [HarmonyPostfix]
+        [HarmonyPriority(Priority.Last)]
         private static void CalculateDailyFoodConsumptionf(MobileParty party, ref ExplainedNumber __result)
         {
             try

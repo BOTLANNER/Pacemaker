@@ -4,7 +4,9 @@ using HarmonyLib;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
+using TaleWorlds.CampaignSystem.ComponentInterfaces;
 using TaleWorlds.CampaignSystem.GameComponents;
+using TaleWorlds.Core;
 using TaleWorlds.Library;
 
 namespace TimeLord.Patches
@@ -15,7 +17,7 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPriority(Priority.HigherThanNormal)]
         [HarmonyPatch("get_PregnancyDurationInDays")]
-        private static bool PregnancyDurationInDays(ref float __result)
+        internal static bool PregnancyDurationInDays(ref float __result)
         {
             try
             {
@@ -24,7 +26,7 @@ namespace TimeLord.Patches
                     return true;
                 }
 
-                __result = Main.Settings.ScaledPregnancyDuration * Main.TimeParam.DayPerYear;
+                __result = Main.Settings.ScaledPregnancyDuration * Campaign.Current.Models.CampaignTimeModel.DaysInWeek * Campaign.Current.Models.CampaignTimeModel.WeeksInSeason * Campaign.Current.Models.CampaignTimeModel.SeasonsInYear;
                 return false;
             }
             catch (Exception e)
@@ -41,13 +43,13 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPriority(Priority.HigherThanNormal)]
         [HarmonyPatch("GetDailyChanceOfPregnancyForHero")]
-        public static bool GetDailyChanceOfPregnancyForHero(ref float __result, ref DefaultPregnancyModel __instance, Hero hero)
+        public static bool GetDailyChanceOfPregnancyForHero(ref float __result, ref PregnancyModel __instance, Hero hero)
         {
             try
             {
                 int count = hero.Children.Count + 1;
                 float tier = (float) (4 + 4 * hero.Clan.Tier);
-                float single = (hero == Hero.MainHero || hero.Spouse == Hero.MainHero ? 1f : Math.Min(1f, (2f * tier - (float) hero.Clan.Lords.Count) / tier));
+                float single = (hero == Hero.MainHero || hero.Spouse == Hero.MainHero ? 1f : Math.Min(1f, (2f * tier - (float) hero.Clan.AliveLords.Count) / tier));
                 float age = (1.2f - (hero.Age - 18f) * 0.04f) / (float) (count * count) * 0.12f * single;
                 bool suitable = false;
                 ExplainedNumber explainedNumber = new ExplainedNumber((hero.Spouse == null || (!IsHeroAgeSuitableForPregnancy(ref __instance, hero, ref suitable) && !suitable) ? 0f : age), false, null);
@@ -58,14 +60,22 @@ namespace TimeLord.Patches
                 __result = explainedNumber.ResultNumber;
                 return false;
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
 
 
         [HarmonyPrefix]
         [HarmonyPriority(Priority.HigherThanNormal)]
         [HarmonyPatch("IsHeroAgeSuitableForPregnancy")]
-        private static bool IsHeroAgeSuitableForPregnancy(ref DefaultPregnancyModel __instance, Hero hero, ref bool __result)
+        internal static bool IsHeroAgeSuitableForPregnancy(ref PregnancyModel __instance, Hero hero, ref bool __result)
         {
             try
             {
@@ -80,7 +90,15 @@ namespace TimeLord.Patches
 
                 return false;
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
     }
 }

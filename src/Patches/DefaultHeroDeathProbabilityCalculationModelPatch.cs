@@ -1,20 +1,19 @@
 ﻿using System;
 
+using HarmonyLib;
+
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.Library;
 
 namespace TimeLord.Patches
 {
-    internal sealed class DefaultHeroDeathProbabilityCalculationModelPatch : Patch
+    [HarmonyPatch(typeof(DefaultHeroDeathProbabilityCalculationModel))]
+    public class DefaultHeroDeathProbabilityCalculationModelPatch
     {
-        internal DefaultHeroDeathProbabilityCalculationModelPatch()
-            : base(Type.Prefix,
-                   new Reflect.Method<DefaultHeroDeathProbabilityCalculationModel>("CalculateHeroDeathProbabilityInternal"),
-                   new Reflect.Method<DefaultHeroDeathProbabilityCalculationModelPatch>(nameof(CalculateHeroDeathProbabilityInternal)),
-                   HarmonyLib.Priority.HigherThanNormal)
-        { }
-
+        [HarmonyPriority(HarmonyLib.Priority.HigherThanNormal)]
+        [HarmonyPatch(nameof(CalculateHeroDeathProbabilityInternal))]
+        [HarmonyPrefix]
         private static bool CalculateHeroDeathProbabilityInternal(ref float __result, Hero hero)
         {
             try
@@ -33,7 +32,7 @@ namespace TimeLord.Patches
                             // Transform for TimeLord age factor
                             age *= Main.Settings!.AdultAgeFactor;
 
-                            float single1 = 1f - MathF.Pow(1f - age, 0.0119047621f);
+                            float single1 = 1f - MathF.Pow(1f - age, 1f / (float) CampaignTime.DaysInYear);
                             single += single1;
                         }
                         else if (hero.Age >= (float) maxAge)
@@ -47,7 +46,15 @@ namespace TimeLord.Patches
                 // Prevent running default function
                 return false;
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
     }
 }

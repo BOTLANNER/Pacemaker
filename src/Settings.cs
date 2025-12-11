@@ -17,8 +17,11 @@ namespace TimeLord
         public override string FolderName => Main.Name;
         public override string FormatType => "json";
 
-        private const string DaysPerSeason_Hint = "Alters the length of a season (and a year). Vanilla uses " +
-            "21. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 7 ]";
+        private const string DaysInWeek_Hint = "Days Per Week. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 7 ]";
+
+        private const string WeeksInSeason_Hint = "Weeks Per Season. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 3 ]";
+
+        private const string SeasonsInYear_Hint = "Seasons Per Year. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 4 ]";
 
         private const string TimeMultiplier_Hint = "Multiplies the rate at which campaign time passes. " +
             "Note that the same general pace is maintained: days simply pass more quickly/slowly. [ Default: 1.75 ]";
@@ -42,9 +45,8 @@ namespace TimeLord
         private const string ScaledPregnancyDuration_Hint = "Scale pregnancy duration to this proportion of a " +
             "year. [ Default: 75% ]";
 
-        private const string AdjustPregnancyDueDates_Hint = "Auto-adjust in-progress pregnancies' due dates to " +
-            "match settings upon load of a game. Still works correctly if another mod is overriding " +
-            "this mod's pregnancy duration setting. [ Default: ON ]";
+        private const string OverridePregnancyMods_Hint = "Attempt to override any pregnancy settings of other mods that might interfere with this mod. " +
+            "This might have unintended side-effects to the other mod. Load order is also a factor. [ Default: OFF ]";
 
         private const string EnableHealingTweaks_Hint = "Auto-calibrate hero & troop healing rate to the Time " +
             "Multiplier in order to maintain vanilla pacing. [ Default: ON ]";
@@ -167,9 +169,17 @@ namespace TimeLord
 
         private const string AlleyGangMemberMaxAge_Hint = "Maximum age for alley gang members. [ Default: 40 ]";
 
-        [SettingPropertyInteger("Days Per Season", 1, 90, HintText = DaysPerSeason_Hint, RequireRestart = false, Order = 0)]
+        [SettingPropertyInteger("Days Per Week", 1, 90, HintText = DaysInWeek_Hint, RequireRestart = false, Order = 0)]
         [SettingPropertyGroup("General Settings", GroupOrder = 0)]
-        public int DaysPerSeason { get; set; } = 7;
+        public int DaysInWeek { get; set; } = 7;
+
+        [SettingPropertyInteger("Weeks Per Season", 1, 90, HintText = WeeksInSeason_Hint, RequireRestart = false, Order = 0)]
+        [SettingPropertyGroup("General Settings")]
+        public int WeeksInSeason { get; set; } = 3;
+
+        [SettingPropertyInteger("Seasons Per Year", 1, 90, HintText = SeasonsInYear_Hint, RequireRestart = false, Order = 0)]
+        [SettingPropertyGroup("General Settings")]
+        public int SeasonsInYear { get; set; } = 4;
 
         [SettingPropertyFloatingInteger("Time Multiplier", 0.3f, 6f, HintText = TimeMultiplier_Hint, RequireRestart = false, Order = 1)]
         [SettingPropertyGroup("General Settings")]
@@ -199,13 +209,13 @@ namespace TimeLord
         [SettingPropertyGroup("Pregnancy Duration", GroupOrder = 1)]
         public bool EnablePregnancyTweaks { get; set; } = true;
 
-        [SettingPropertyFloatingInteger("Year-Scaled Pregnancy Duration Factor", 0.2f, 4f, "#0%", HintText = ScaledPregnancyDuration_Hint, RequireRestart = false, Order = 1)]
+        [SettingPropertyFloatingInteger("Year-Scaled Pregnancy Duration Factor", 0.01f, 4f, "#0%", HintText = ScaledPregnancyDuration_Hint, RequireRestart = false, Order = 1)]
         [SettingPropertyGroup("Pregnancy Duration")]
         public float ScaledPregnancyDuration { get; set; } = 0.75f;
 
-        [SettingPropertyBool("Adjust In-Progress Pregnancy Due Dates", HintText = AdjustPregnancyDueDates_Hint, RequireRestart = false, Order = 2)]
+        [SettingPropertyBool("Override Conflicting Pregnancy Mods", HintText = OverridePregnancyMods_Hint, RequireRestart = true, Order = 3)]
         [SettingPropertyGroup("Pregnancy Duration")]
-        public bool AdjustPregnancyDueDates { get; set; } = true;
+        public bool OverridePregnancyMods { get; set; } = false;
 
         [SettingPropertyBool("Healing Rate Auto-Calibration", HintText = EnableHealingTweaks_Hint, RequireRestart = false, IsToggle = true, Order = 0)]
         [SettingPropertyGroup("Healing Rate Auto-Calibration", GroupOrder = 2)]
@@ -440,37 +450,5 @@ namespace TimeLord
         [SettingPropertyGroup("Occupation Ages")]
         public int AlleyGangMemberMaxAge { get; set; } = 40;
 
-        public List<string> ToStringLines(uint indentSize = 0)
-        {
-            string prefix = string.Empty;
-
-            for (uint i = 0; i < indentSize; ++i)
-            {
-                prefix += " ";
-            }
-
-            return new List<string>
-            {
-                $"{prefix}{nameof(DaysPerSeason)}           = {DaysPerSeason}",
-                $"{prefix}{nameof(TimeMultiplier)}          = {TimeMultiplier}",
-                $"{prefix}{nameof(PlayTimeMultiplier)}        = {PlayTimeMultiplier}",
-                $"{prefix}{nameof(FastForwardTimeMultiplier)} = {FastForwardTimeMultiplier}",
-                $"{prefix}{nameof(AdultAgeFactor)}          = {AdultAgeFactor}",
-                $"{prefix}{nameof(ChildAgeFactor)}          = {ChildAgeFactor}",
-                $"{prefix}{nameof(EnablePregnancyTweaks)}   = {EnablePregnancyTweaks}",
-                $"{prefix}{nameof(ScaledPregnancyDuration)} = {ScaledPregnancyDuration}",
-                $"{prefix}{nameof(AdjustPregnancyDueDates)} = {AdjustPregnancyDueDates}",
-                $"{prefix}{nameof(EnableHealingTweaks)}     = {EnableHealingTweaks}",
-                $"{prefix}{nameof(HealingRateFactor)}       = {HealingRateFactor}",
-                $"{prefix}{nameof(EnableFoodTweaks)}        = {EnableFoodTweaks}",
-                $"{prefix}{nameof(EnableAgeStageTweaks)}    = {EnableAgeStageTweaks}",
-                $"{prefix}{nameof(BecomeInfantAge)}         = {BecomeInfantAge}",
-                $"{prefix}{nameof(BecomeChildAge)}          = {BecomeChildAge}",
-                $"{prefix}{nameof(BecomeTeenagerAge)}       = {BecomeTeenagerAge}",
-                $"{prefix}{nameof(HeroComesOfAge)}          = {HeroComesOfAge}",
-                $"{prefix}{nameof(BecomeOldAge)}            = {BecomeOldAge}",
-                $"{prefix}{nameof(MaxAge)}                  = {MaxAge}",
-            };
-        }
     }
 }

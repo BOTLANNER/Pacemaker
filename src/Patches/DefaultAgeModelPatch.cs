@@ -76,7 +76,15 @@ namespace TimeLord.Patches
                 __result = Main.Settings!.BecomeOldAge;
                 return false;
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
 
         [HarmonyPrefix]
@@ -92,7 +100,15 @@ namespace TimeLord.Patches
                 __result = Main.Settings!.BecomeTeenagerAge;
                 return false;
             }
-            catch (Exception e) { throw; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
 
         [HarmonyPrefix]
@@ -108,7 +124,15 @@ namespace TimeLord.Patches
                 __result = Main.Settings!.HeroComesOfAge;
                 return false;
             }
-            catch (Exception e) { throw; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
 
         [HarmonyPrefix]
@@ -124,7 +148,15 @@ namespace TimeLord.Patches
                 __result = Main.Settings!.MaxAge;
                 return false;
             }
-            catch (Exception e) { throw; }
+            catch (Exception e)
+            {
+                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Debug.PrintError(e.Message, e.StackTrace);
+                Debug.WriteDebugLineOnScreen(e.ToString());
+                Debug.SetCrashReportCustomString(e.Message);
+                Debug.SetCrashReportCustomStack(e.StackTrace);
+                return true;
+            }
         }
 
         [HarmonyPrefix]

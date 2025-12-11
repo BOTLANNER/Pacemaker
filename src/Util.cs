@@ -63,13 +63,7 @@ namespace TimeLord
                 {
                     msg.AddRange(new List<string>
                     {
-                        $"Campaign Time:      {new SimpleTime(CampaignTime.Now)}",
-                        $"  Elapsed Years:    {Campaign.Current.CampaignStartTime.ElapsedYearsUntilNow:F3}",
-                        $"  Elapsed Seasons:  {Campaign.Current.CampaignStartTime.ElapsedSeasonsUntilNow:F3}",
-                        $"  Elapsed Days:     {Campaign.Current.CampaignStartTime.ElapsedDaysUntilNow:F2}",
-                        $"  Elapsed Hours:    {Campaign.Current.CampaignStartTime.ElapsedHoursUntilNow:F2}",
-                        $"  Day of Season:    {CampaignTime.Now.GetDayOfSeason + 1}",
-                        $"  Hour of Day:      {CampaignTime.Now.GetHourOfDay}",
+                        $"In Campaign:      true"
                     });
                 }
 

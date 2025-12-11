@@ -256,6 +256,11 @@ namespace TimeLord.Patches
             catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
         }
 
+        public Func<Harmony, bool>? DelayedPatch()
+        {
+            return null;
+        }
+
         //private static Type TypeResolver(Assembly arg1, string arg2, bool arg3)
         //{
         //    throw new NotImplementedException();

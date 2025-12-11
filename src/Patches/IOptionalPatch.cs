@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System;
+
+using HarmonyLib;
 
 namespace TimeLord.Patches
 {
@@ -7,5 +9,7 @@ namespace TimeLord.Patches
         public bool TryPatch(Harmony harmony);
 
         public bool MenusInitialised(Harmony harmony);
+
+        public Func<Harmony,bool>? DelayedPatch();
     }
 }
