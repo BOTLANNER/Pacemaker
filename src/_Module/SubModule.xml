@@ -1,7 +1,7 @@
 ﻿<Module>
   <Name value="TimeLord"/>
   <Id value="TimeLord"/>
-  <Version value="v3.0.0.0"/>
+  <Version value="v3.0.1.0"/>
   <Url value="https://www.nexusmods.com/mountandblade2bannerlord/mods/4621" />
   <SingleplayerModule value="true"/>
   <MultiplayerModule value="false"/>

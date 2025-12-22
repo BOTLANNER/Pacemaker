@@ -106,7 +106,7 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
-                TimeLord.Util.Log.NotifyBad(e.ToString());
+                Util.Log.NotifyBad(e.ToString());
                 Debug.PrintError(e.Message, e.StackTrace);
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 Debug.SetCrashReportCustomString(e.Message);
@@ -117,101 +117,116 @@ namespace TimeLord.Patches
 
         public static bool RecordPrePregnantInfo(ref object __instance, ref Dictionary<Hero, object> ___m_prePregnancyInfoMap, Hero sexPartner1, Hero sexPartner2)
         {
+            bool runOriginalMethod;
+            bool skip;
             try
             {
-                bool flag;
                 if ((double) MBRandom.RandomFloatRanged(0f, 1f) > (double) Config.PregnancyChance || sexPartner1 == null || sexPartner2 == null)
                 {
-                    flag = true;
+                    skip = true;
                 }
                 else
                 {
-                    flag = (Config.LesbianPregnancy || !sexPartner1.IsFemale ? false : sexPartner2.IsFemale);
+                    skip = (Config.LesbianPregnancy || !sexPartner1.IsFemale ? false : sexPartner2.IsFemale);
                 }
-                if (!flag)
+                if (!skip)
                 {
-                    Hero key = null;
-                    Hero father = null;
-                    bool oneIsLady = (!sexPartner1.IsAlive || !sexPartner1.IsFemale || sexPartner1.IsPregnant ? false : (double) sexPartner1.Age > (double) Config.MinAge);
-                    bool TwoIsLady = (!sexPartner2.IsAlive || !sexPartner2.IsFemale || sexPartner2.IsPregnant ? false : (double) sexPartner2.Age > (double) Config.MinAge);
-                    if (oneIsLady & TwoIsLady)
+                    Hero hero = null;
+                    Hero hero1 = null;
+                    bool flag2 = (!sexPartner1.IsAlive || !sexPartner1.IsFemale || sexPartner1.IsPregnant ? false : (double) sexPartner1.Age > (double) Config.MinAge);
+                    bool flag3 = (!sexPartner2.IsAlive || !sexPartner2.IsFemale || sexPartner2.IsPregnant ? false : (double) sexPartner2.Age > (double) Config.MinAge);
+                    if (flag2 & flag3)
                     {
                         if (((object) sexPartner1 == (object) Hero.MainHero ? true : (object) sexPartner2 == (object) Hero.MainHero))
                         {
-                            if (Config.LesbianPregnancyOn == "Player Only")
+                            if (Config.LesbianPregnancyOn == "{=familycontrol_mcm_38}Player Only")
                             {
                                 if ((object) sexPartner1 != (object) Hero.MainHero)
                                 {
-                                    key = sexPartner2;
-                                    father = sexPartner1;
+                                    hero = sexPartner2;
+                                    hero1 = sexPartner1;
                                 }
                                 else
                                 {
-                                    key = sexPartner1;
-                                    father = sexPartner2;
+                                    hero = sexPartner1;
+                                    hero1 = sexPartner2;
                                 }
                             }
-                            else if (Config.LesbianPregnancyOn == "NPC Only")
+                            else if (Config.LesbianPregnancyOn == "{=familycontrol_mcm_39}NPC Only")
                             {
                                 if ((object) sexPartner1 != (object) Hero.MainHero)
                                 {
-                                    key = sexPartner1;
-                                    father = sexPartner2;
+                                    hero = sexPartner1;
+                                    hero1 = sexPartner2;
                                 }
                                 else
                                 {
-                                    key = sexPartner2;
-                                    father = sexPartner1;
+                                    hero = sexPartner2;
+                                    hero1 = sexPartner1;
                                 }
                             }
                             else if (MBRandom.RandomInt(0, 1) != 0)
                             {
-                                key = sexPartner1;
-                                father = sexPartner2;
+                                hero = sexPartner1;
+                                hero1 = sexPartner2;
                             }
                             else
                             {
-                                key = sexPartner1;
-                                father = sexPartner2;
+                                hero = sexPartner1;
+                                hero1 = sexPartner2;
                             }
                         }
                     }
-                    else if (oneIsLady)
+                    else if (flag2)
                     {
-                        key = sexPartner1;
-                        father = sexPartner2;
+                        hero = sexPartner1;
+                        hero1 = sexPartner2;
                     }
-                    else if (TwoIsLady)
+                    else if (flag3)
                     {
-                        key = sexPartner2;
-                        father = sexPartner1;
+                        hero = sexPartner2;
+                        hero1 = sexPartner1;
                     }
-                    if ((key == null ? false : father != null))
+                    if ((hero == null ? false : hero1 != null))
                     {
-                        Type mapInfoType = __instance.GetType().Assembly.GetType("FamilyControl.FamilyControlBehavior+PrePregnancyInfo");
-                        var m_pregnantDateField = AccessTools.Field(mapInfoType, "m_pregnantDate");
-                        var m_fatherField = AccessTools.Field(mapInfoType, "m_father");
-
-                        CampaignTime pregnantDate = CampaignTime.DaysFromNow((float) MBRandom.RandomInt(Config.MinPregnancyDelay, Config.MaxPregnancyDelay));
-                        if (!___m_prePregnancyInfoMap.ContainsKey(key))
+                        CampaignTime campaignTime = CampaignTime.DaysFromNow((float) MBRandom.RandomInt(Config.MinPregnancyDelay, Config.MaxPregnancyDelay));
+                        Type type = __instance.GetType().Assembly.GetType("FamilyControl.FamilyControlBehavior+PrePregnancyInfo");
+                        FieldInfo fieldInfo = AccessTools.Field(type, "m_pregnantDate");
+                        FieldInfo fieldInfo1 = AccessTools.Field(type, "m_father");
+                        if (!___m_prePregnancyInfoMap.ContainsKey(hero))
                         {
-                            ConstructorInfo constructorInfo = AccessTools.Constructor(mapInfoType, new[] { typeof(Hero), typeof(CampaignTime) });
-                            ___m_prePregnancyInfoMap.Add(key, constructorInfo.Invoke(parameters: new object[] { father, pregnantDate }));
+                            ConstructorInfo constructorInfo = AccessTools.Constructor(type, new Type[] { typeof(Hero), typeof(CampaignTime) }, false);
+                            ___m_prePregnancyInfoMap.Add(hero, constructorInfo.Invoke(new object[] { hero1, campaignTime }));
                         }
-                        else if (((CampaignTime) m_pregnantDateField.GetValue(___m_prePregnancyInfoMap[key])) > pregnantDate)
+                        else if ((CampaignTime) fieldInfo.GetValue(___m_prePregnancyInfoMap[hero]) > campaignTime)
                         {
-                            m_fatherField.SetValue(___m_prePregnancyInfoMap[key], father);
-                            m_pregnantDateField.SetValue(___m_prePregnancyInfoMap[key], pregnantDate);
+                            fieldInfo1.SetValue(___m_prePregnancyInfoMap[hero], hero1);
+                            fieldInfo.SetValue(___m_prePregnancyInfoMap[hero], campaignTime);
                         }
-                        Type utilityType = __instance.GetType().Assembly.GetType("FamilyControl.Utillty");
-                        MethodInfo RealDisplayMessage = AccessTools.Method(utilityType, "RealDisplayMessage");
-                        RealDisplayMessage.Invoke(null, new object[] { string.Concat(new string[] { "_recordPrePregnantInfo Success! Mother : ", key.Name.ToString(), " Father : ", father.Name.ToString(), " PregnantDate : ", pregnantDate.ToString() }) });
+                        Type type1 = __instance.GetType().Assembly.GetType("FamilyControl.Utillty");
+                        MethodInfo methodInfo = AccessTools.Method(type1, "RealDisplayMessage", null, null);
+                        methodInfo.Invoke(null, new object[] { string.Concat(new string[] { "_recordPrePregnantInfo Success! Mother : ", hero.Name.ToString(), " Father : ", hero1.Name.ToString(), " PregnantDate : ", campaignTime.ToString() }) });
+                        runOriginalMethod = false;
+                    }
+                    else
+                    {
+                        runOriginalMethod = false;
                     }
                 }
-
-                return false;
+                else
+                {
+                    runOriginalMethod = false;
+                }
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception exception1)
+            {
+                Exception exception = exception1;
+                Util.Log.NotifyBad(exception.ToString());
+                Debug.SetCrashReportCustomString(exception.Message);
+                Debug.SetCrashReportCustomStack(exception.StackTrace);
+                runOriginalMethod = true;
+            }
+            return runOriginalMethod;
         }
 
         //private static void ConfigStaticCtor()
@@ -253,7 +268,7 @@ namespace TimeLord.Patches
                 }
                 return false;
             }
-            catch (Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
+            catch (Exception e) { Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); return true; }
         }
 
         public Func<Harmony, bool>? DelayedPatch()
@@ -286,7 +301,7 @@ namespace TimeLord.Patches
                 }
                 catch (Exception e)
                 {
-                    TimeLord.Util.Log.NotifyBad(e.ToString());
+                    Util.Log.NotifyBad(e.ToString());
                     Debug.PrintError(e.Message, e.StackTrace);
                     Debug.WriteDebugLineOnScreen(e.ToString());
                     Debug.SetCrashReportCustomString(e.Message);
@@ -336,6 +351,8 @@ namespace TimeLord.Patches
             internal static bool NPCAbortionDecline => (bool) _realType.GetField("NPCAbortionDecline", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 
             internal static bool BattleAbortion => (bool) _realType.GetField("BattleAbortion", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+
+            internal static float MaxAge => (float) _realType.GetField("MaxAge", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 
             private static bool ageInit = false;
             internal static float MinAge
