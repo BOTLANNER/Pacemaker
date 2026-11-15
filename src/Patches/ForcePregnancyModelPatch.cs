@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -31,9 +31,9 @@ namespace TimeLord.Patches
         {
             try
             {
-                if (!Main.Settings!.EnablePregnancyTweaks || !Main.Settings!.OverridePregnancyMods)
+                if (Main.Settings == null || !Main.Settings.EnablePregnancyTweaks || !Main.Settings.OverridePregnancyMods)
                 {
-                    return false;
+                    return true;
                 }
 
                 var baseType = typeof(PregnancyModel);
@@ -43,32 +43,32 @@ namespace TimeLord.Patches
                 Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 foreach (var assembly in assemblies)
                 {
-                    foreach (var type in assembly.GetTypes())
+                    foreach (var type in PatchSafety.LoadableTypes(assembly))
                     {
                         try
                         {
-                            if (type.IsSubclassOf(baseType))
+                            if (!type.IsAbstract && type.IsSubclassOf(baseType))
                             {
 
                                 var pregnancyModelType = type;
                                 if (pregnancyModelType != null && pregnancyModelType != defaultType)
                                 {
                                     MethodInfo pregnancyDurationInDaysGetter = AccessTools.PropertyGetter(pregnancyModelType, "PregnancyDurationInDays");
-                                    if (pregnancyDurationInDaysGetter.DeclaringType == pregnancyModelType)
+                                    if (pregnancyDurationInDaysGetter != null && !pregnancyDurationInDaysGetter.IsAbstract && pregnancyDurationInDaysGetter.DeclaringType == pregnancyModelType)
                                     {
-                                        harmony.Patch(pregnancyDurationInDaysGetter, prefix: new HarmonyMethod(typeof(DefaultPregnancyModelPatch), nameof(DefaultPregnancyModelPatch.PregnancyDurationInDays)));
+                                        PatchSafety.PrefixOnce(harmony, pregnancyDurationInDaysGetter, typeof(DefaultPregnancyModelPatch), nameof(DefaultPregnancyModelPatch.PregnancyDurationInDays));
                                     }
 
-                                    MethodInfo getDailyChanceOfPregnancyForHeroMethod = AccessTools.Method(pregnancyModelType, "GetDailyChanceOfPregnancyForHero");
-                                    if (getDailyChanceOfPregnancyForHeroMethod.DeclaringType == pregnancyModelType)
+                                    MethodInfo getDailyChanceOfPregnancyForHeroMethod = AccessTools.Method(pregnancyModelType, "GetDailyChanceOfPregnancyForHero", new[] { typeof(Hero) });
+                                    if (getDailyChanceOfPregnancyForHeroMethod != null && !getDailyChanceOfPregnancyForHeroMethod.IsAbstract && getDailyChanceOfPregnancyForHeroMethod.DeclaringType == pregnancyModelType)
                                     {
-                                        harmony.Patch(getDailyChanceOfPregnancyForHeroMethod, prefix: new HarmonyMethod(typeof(DefaultPregnancyModelPatch), nameof(DefaultPregnancyModelPatch.GetDailyChanceOfPregnancyForHero)));
+                                        PatchSafety.PrefixOnce(harmony, getDailyChanceOfPregnancyForHeroMethod, typeof(DefaultPregnancyModelPatch), nameof(DefaultPregnancyModelPatch.GetDailyChanceOfPregnancyForHero));
                                     }
 
-                                    MethodInfo isHeroAgeSuitableForPregnancyMethod = AccessTools.Method(pregnancyModelType, "IsHeroAgeSuitableForPregnancy");
-                                    if (isHeroAgeSuitableForPregnancyMethod.DeclaringType == pregnancyModelType)
+                                    MethodInfo isHeroAgeSuitableForPregnancyMethod = AccessTools.Method(pregnancyModelType, "IsHeroAgeSuitableForPregnancy", new[] { typeof(Hero) });
+                                    if (isHeroAgeSuitableForPregnancyMethod != null && !isHeroAgeSuitableForPregnancyMethod.IsAbstract && isHeroAgeSuitableForPregnancyMethod.DeclaringType == pregnancyModelType)
                                     {
-                                        harmony.Patch(isHeroAgeSuitableForPregnancyMethod, prefix: new HarmonyMethod(typeof(DefaultPregnancyModelPatch), nameof(DefaultPregnancyModelPatch.IsHeroAgeSuitableForPregnancy)));
+                                        PatchSafety.PrefixOnce(harmony, isHeroAgeSuitableForPregnancyMethod, typeof(DefaultPregnancyModelPatch), nameof(DefaultPregnancyModelPatch.IsHeroAgeSuitableForPregnancy));
                                     }
                                 }
                             }

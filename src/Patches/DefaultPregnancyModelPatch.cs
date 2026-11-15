@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using HarmonyLib;
 
@@ -21,12 +21,12 @@ namespace TimeLord.Patches
         {
             try
             {
-                if (!Main.Settings!.EnablePregnancyTweaks)
+                if (Main.Settings == null || !Main.Settings.EnablePregnancyTweaks || CampaignTime.DaysInYear <= 0)
                 {
                     return true;
                 }
 
-                __result = Main.Settings.ScaledPregnancyDuration * Campaign.Current.Models.CampaignTimeModel.DaysInWeek * Campaign.Current.Models.CampaignTimeModel.WeeksInSeason * Campaign.Current.Models.CampaignTimeModel.SeasonsInYear;
+                __result = Main.Settings.ScaledPregnancyDuration * CampaignTime.DaysInYear;
                 return false;
             }
             catch (Exception e)
@@ -43,21 +43,24 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPriority(Priority.HigherThanNormal)]
         [HarmonyPatch("GetDailyChanceOfPregnancyForHero")]
-        public static bool GetDailyChanceOfPregnancyForHero(ref float __result, ref PregnancyModel __instance, Hero hero)
+        public static bool GetDailyChanceOfPregnancyForHero(ref float __result, Hero hero)
         {
             try
             {
+                if (Main.Settings == null || hero?.Clan == null) return true;
                 int count = hero.Children.Count + 1;
                 float tier = (float) (4 + 4 * hero.Clan.Tier);
                 float single = (hero == Hero.MainHero || hero.Spouse == Hero.MainHero ? 1f : Math.Min(1f, (2f * tier - (float) hero.Clan.AliveLords.Count) / tier));
                 float age = (1.2f - (hero.Age - 18f) * 0.04f) / (float) (count * count) * 0.12f * single;
                 bool suitable = false;
-                ExplainedNumber explainedNumber = new ExplainedNumber((hero.Spouse == null || (!IsHeroAgeSuitableForPregnancy(ref __instance, hero, ref suitable) && !suitable) ? 0f : age), false, null);
+                ExplainedNumber explainedNumber = new ExplainedNumber((hero.Spouse == null || (!IsHeroAgeSuitableForPregnancy(hero, ref suitable) && !suitable) ? 0f : age), false, null);
                 if (hero.GetPerkValue(DefaultPerks.Charm.Virile) || (hero.Spouse?.GetPerkValue(DefaultPerks.Charm.Virile) ?? false))
                 {
                     explainedNumber.AddFactor(DefaultPerks.Charm.Virile.PrimaryBonus, DefaultPerks.Charm.Virile.Name);
                 }
-                __result = explainedNumber.ResultNumber;
+                var chance = explainedNumber.ResultNumber;
+                if (float.IsNaN(chance) || float.IsInfinity(chance)) return true;
+                __result = Math.Max(0f, Math.Min(1f, chance));
                 return false;
             }
             catch (Exception e)
@@ -75,11 +78,12 @@ namespace TimeLord.Patches
         [HarmonyPrefix]
         [HarmonyPriority(Priority.HigherThanNormal)]
         [HarmonyPatch("IsHeroAgeSuitableForPregnancy")]
-        internal static bool IsHeroAgeSuitableForPregnancy(ref PregnancyModel __instance, Hero hero, ref bool __result)
+        internal static bool IsHeroAgeSuitableForPregnancy(Hero hero, ref bool __result)
         {
             try
             {
-                if (hero.Age < Main.Settings!.HeroComesOfAge)
+                if (Main.Settings == null || hero == null) return true;
+                if (hero.Age < Main.Settings.HeroComesOfAge)
                 {
                     __result = false;
                 }

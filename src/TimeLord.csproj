@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Version>3.0.2.0</Version>
@@ -10,26 +10,15 @@
     <Platforms>x64</Platforms>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
-    <Configurations>Stable_Debug;Stable_Release;Beta_Debug;Beta_Release</Configurations>
+    <Configurations>Debug;Release;Stable_Debug;Stable_Release;Beta_Debug;Beta_Release</Configurations>
+    <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
+    <RestoreSources></RestoreSources>
   </PropertyGroup>
 
-  <!-- Versions of Major Dependencies (For Package References & SubModule.xml Substitution) -->
   <PropertyGroup>
-    <BuildResourcesVersion>1.1.0.129</BuildResourcesVersion>
-    <HarmonyVersion>2.4.2</HarmonyVersion>
+    <GameVersion>1.5.7</GameVersion>
     <MCM_V5>true</MCM_V5>
   </PropertyGroup>
-  
-  <PropertyGroup>
-    <MCMVersion Condition="$(MCM_V5) == 'true'">5.11.3</MCMVersion>
-  </PropertyGroup>
-
-  <!-- Game Versions for Stable and Beta -->
-  <PropertyGroup>
-    <GameVersion Condition="$(IsStable) == 'true'">1.2.11.45697</GameVersion>
-    <GameVersion Condition="$(IsBeta) == 'true'">1.2.11.45697</GameVersion>
-  </PropertyGroup>
-
   <!-- Game Folder(s) -->
   <PropertyGroup>
     <!--
@@ -38,8 +27,8 @@
     separate game folders for the stable and beta versions of the game, likewise set BANNERLORD_STABLE_DIR and
     BANNERLORD_BETA_DIR.
     -->
-    <GameFolder Condition="$(IsStable) == 'true'">$(BANNERLORD_STABLE_DIR)</GameFolder>
-    <GameFolder Condition="$(IsBeta) == 'true'">$(BANNERLORD_BETA_DIR)</GameFolder>
+    <GameFolder Condition="'$(GameFolder)' == '' AND $(IsStable) == 'true'">$(BANNERLORD_STABLE_DIR)</GameFolder>
+    <GameFolder Condition="'$(GameFolder)' == '' AND $(IsBeta) == 'true'">$(BANNERLORD_BETA_DIR)</GameFolder>
     <GameFolder Condition="$(GameFolder) == ''">$(BANNERLORD_GAME_DIR)</GameFolder>
   </PropertyGroup>
 
@@ -48,8 +37,6 @@
     <!--Windows-->
     <!--Get from Registry (not working with dotnet right now)-->
     <GameFolder Condition="!Exists($(GameFolder)) AND $(OS) == 'Windows_NT'">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 261550@InstallLocation)</GameFolder>
-    <!--Set a default value if registry value is missing-->
-    <GameFolder Condition="!Exists($(GameFolder)) AND $(OS) == 'Windows_NT'">C:\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord</GameFolder>
     <!--Unix-->
     <GameFolder Condition="!Exists($(GameFolder)) AND $(OS) == 'Unix'">~/.steam/root/steamapps/common/Mount &amp; Blade II Bannerlord</GameFolder>
   </PropertyGroup>
@@ -62,34 +49,6 @@
     <RootNamespace>TimeLord</RootNamespace>
     <AssemblyName>TimeLord</AssemblyName>
   </PropertyGroup>
-
-  <!-- Extra Substitution Variables to Use in SubModule.xml -->
-  <ItemGroup>
-    <SubModuleOverrides Include="MCMVersion">
-      <Regex>\$mcmversion\$</Regex>
-      <Replacement>$(MCMVersion)</Replacement>
-    </SubModuleOverrides>
-  </ItemGroup>
-
-  <!-- NuGet References -->
-  <ItemGroup>
-    <PackageReference Include="Bannerlord.BuildResources" Version="$(BuildResourcesVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Bannerlord.MCM" Version="$(MCMVersion)" />
-    <!--<PackageReference Include="Lib.Harmony" Version="$(HarmonyVersion)" />-->
-    <!--<PackageReference Include="Newtonsoft.Json" Version="11.0.2" IncludeAssets="compile" />-->
-    <!-- Enable NET5 Features on NET472 -->
-    <PackageReference Include="IsExternalInit" Version="1.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Nullable" Version="1.3.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 
   <ItemGroup>
     <!-- Bannerlord Native Assemblies -->
@@ -106,7 +65,7 @@
       <HintPath>%(Identity)</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="$(GameFolder)\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\*.dll">
+    <Reference Include="$(GameFolder)\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\0Harmony.dll">
       <HintPath>%(Identity)</HintPath>
       <Private>False</Private>
     </Reference>
@@ -124,15 +83,26 @@
     </Reference>
   </ItemGroup>
 
+  <!-- Compile against the installed runtime dependencies; never redistribute their DLLs. -->
   <ItemGroup>
-    <Reference Update="$(GameFolder)\bin\Win64_Shipping_Client\Newtonsoft.Json.dll">
-      <Private>true</Private>
-      <SpecificVersion>false</SpecificVersion>
+    <Reference Include="MCMv5">
+      <HintPath>$(GameFolder)\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
+      <Private>false</Private>
     </Reference>
+    <Reference Include="netstandard" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y &quot;$(ProjectDir)_Module\SubModule.xml&quot; &quot;$(GameFolder)\Modules\TimeLord\&quot;&#xD;&#xA;xcopy /y &quot;$(TargetDir)*.dll&quot; &quot;$(GameFolder)\Modules\TimeLord\bin\Win64_Shipping_Client\&quot;&#xD;&#xA;xcopy /y &quot;$(TargetDir)*.pdb&quot; &quot;$(GameFolder)\Modules\TimeLord\bin\Win64_Shipping_Client\&quot;" />
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll')"
+           Text="Set GameFolder (or BANNERLORD_GAME_DIR) to the read-only Bannerlord 1.5.7 installation." />
+    <Error Condition="!Exists('$(GameFolder)\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll')"
+           Text="The installed MCM v5 assembly is required." />
+    <Error Condition="!Exists('$(GameFolder)\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\0Harmony.dll')"
+           Text="The installed Harmony assembly is required." />
   </Target>
 
+  <!-- Build output stays local. There is deliberately no install/deploy target. -->
+  <Target Name="StageModuleManifest" AfterTargets="Build">
+    <Copy SourceFiles="$(ProjectDir)_Module\SubModule.xml" DestinationFolder="$(TargetDir)" />
+  </Target>
 </Project>

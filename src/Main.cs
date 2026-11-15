@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+
 
 using HarmonyLib;
 
@@ -74,7 +74,7 @@ namespace TimeLord
 
         }
 
-        private static readonly IOptionalPatch[] HarmonyOptionalPatches;
+        private static readonly IOptionalPatch[] HarmonyOptionalPatches = Array.Empty<IOptionalPatch>();
 
         protected override void OnSubModuleLoad()
         {
@@ -93,123 +93,35 @@ namespace TimeLord
                 //    patch.Apply(Harmony);
                 //}
 
-                var delayedPatches = new List<Func<Harmony, bool>>();
                 foreach (var patch in HarmonyOptionalPatches)
                 {
-                    Util.Log.ToFile($"Applying: {patch}");
-                    if (patch.TryPatch(Harmony))
+                    try
                     {
-                        var delayed = patch.DelayedPatch();
-                        if (delayed != null)
+                        if (patch.TryPatch(Harmony))
                         {
-                            delayedPatches.Add(delayed);
+                            var delayed = patch.DelayedPatch();
+                            if (delayed != null) _delayedPatches.Add(delayed);
                         }
                     }
-
-                }
-
-                Util.Log.ToFile("\nApplying standard Harmony patches in bulk...");
-                try
-                {
-                    Harmony.PatchAll();
-                }
-                catch (System.Exception ex)
-                {
-                    Util.Log.NotifyBad("\nTimeLord: Patch all failed, attempting one by one...");
-                    var assembly = Assembly.GetExecutingAssembly();
-                    var types = AccessTools.GetTypesFromAssembly(assembly);
-                    for (int i = 0; i < types.Length; i++)
+                    catch (Exception e)
                     {
-                        try
-                        {
-                            var type = types[i];
-                            Harmony.CreateClassProcessor(type).Patch();
-                        }
-                        catch (Exception e)
-                        {
-                            if (Debugger.IsAttached)
-                            {
-                                Debugger.Break();
-                            }
-                            SetupExceptions.Add(e);
-                            Util.Log.NotifyBad($"\nTimeLord: {e.Message}");
-                            Debug.PrintError(e.Message, e.StackTrace);
-                            Debug.WriteDebugLineOnScreen(e.ToString());
-                            Debug.SetCrashReportCustomString(e.Message);
-                            Debug.SetCrashReportCustomStack(e.StackTrace);
-                        }
+                        PatchSafety.Rollback(Harmony, patch.GetType());
+                        ReportSetupFailure(e);
                     }
-
                 }
 
-                if (delayedPatches.Count > 0)
+                // Process each class once; do not retry a partially successful PatchAll.
+                foreach (var type in PatchSafety.LoadableTypes(Assembly.GetExecutingAssembly()))
                 {
-                    Util.Log.ToFile("\nStarting counter for delayed Harmony patches...");
-                    Task.Run(async () =>
+                    if (!type.IsDefined(typeof(HarmonyPatch), false)) continue;
+                    try { Harmony.CreateClassProcessor(type).Patch(); }
+                    catch (Exception e)
                     {
-                        try
-                        {
-                            // TODO: Why? https://forums.taleworlds.com/index.php?threads/modding-critical-issues-with-agent-handleblow-and-visual-system-changes-in-1-3-5-1-3-6.467766/
-                            await Task.Delay(8000); // 8 second delay
-
-                            Util.Log.ToFile("\nForced wait period done for delayed Harmony patches...");
-
-                            // Wait for any active missions to finish
-                            int attempts = 0;
-                            while (Mission.Current != null && attempts < 50)
-                            {
-                                await Task.Delay(100);
-                                attempts++;
-                            }
-
-                            Util.Log.ToFile("\nNo more current Mission for delayed Harmony patches...");
-
-                            for (int i = 0; i < delayedPatches.Count; i++)
-                            {
-                                try
-                                {
-                                    Func<Harmony, bool>? delayed = delayedPatches[i];
-                                    if (delayed != null)
-                                    {
-                                        delayed.Invoke(Harmony);
-                                    }
-                                }
-                                catch (Exception e)
-                                {
-                                    if (Debugger.IsAttached)
-                                    {
-                                        Debugger.Break();
-                                    }
-                                    TimeLord.Util.Log.NotifyBad(e.ToString());
-                                    Debug.PrintError(e.Message, e.StackTrace);
-                                    Debug.WriteDebugLineOnScreen(e.ToString());
-                                    Debug.SetCrashReportCustomString(e.Message);
-                                    Debug.SetCrashReportCustomStack(e.StackTrace);
-                                }
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            if (Debugger.IsAttached)
-                            {
-                                Debugger.Break();
-                            }
-                            TimeLord.Util.Log.NotifyBad(e.ToString());
-                            Debug.PrintError(e.Message, e.StackTrace);
-                            Debug.WriteDebugLineOnScreen(e.ToString());
-                            Debug.SetCrashReportCustomString(e.Message);
-                            Debug.SetCrashReportCustomStack(e.StackTrace);
-                        }
-
-                        DelayedPatchesComplete = true;
-                    });
-
+                        PatchSafety.Rollback(Harmony, type);
+                        ReportSetupFailure(e);
+                    }
                 }
-                else
-                {
-                    DelayedPatchesComplete = true;
-                }
-
+                DelayedPatchesComplete = _delayedPatches.Count == 0 && !SetupExceptions.Any();
                 Util.Log.ToFile("Done.");
             }
             catch (System.Exception e)
@@ -230,6 +142,7 @@ namespace TimeLord
         {
             try
             {
+                bool firstLoad = !_loaded;
                 var trace = new List<string>();
 
                 if (_loaded)
@@ -243,6 +156,7 @@ namespace TimeLord
 
                 if (Settings.Instance is not null && Settings.Instance != Settings)
                 {
+                    if (Settings != null) Settings.PropertyChanged -= Settings_OnPropertyChanged;
                     Settings = Settings.Instance;
 
                     // register for settings property-changed events
@@ -253,15 +167,21 @@ namespace TimeLord
 
                 if (!_loaded)
                 {
-                    InformationManager.DisplayMessage(new InformationMessage($"Loaded {DisplayName}", ImportantTextColor));
+                    if (Settings == null) throw new InvalidOperationException("TimeLord: MCM settings unavailable; cannot initialize.");
                     _loaded = true;
 
                     foreach (var patch in HarmonyOptionalPatches)
                     {
-                        patch.MenusInitialised(Harmony);
+                        try
+                        {
+                            if (!patch.MenusInitialised(Harmony))
+                                ReportSetupFailure(new InvalidOperationException($"TimeLord: {patch.GetType().Name} did not initialize."));
+                        }
+                        catch (Exception e) { ReportSetupFailure(e); }
                     }
                 }
 
+                ApplyDelayedPatches();
                 Util.Log.ToFile(trace);
 
 
@@ -269,6 +189,8 @@ namespace TimeLord
                 {
                     throw new AggregateException("TimeLord: Started with errors", SetupExceptions);
                 }
+                if (firstLoad && DelayedPatchesComplete)
+                    InformationManager.DisplayMessage(new InformationMessage($"Loaded {DisplayName}", ImportantTextColor));
             }
             catch (System.Exception e)
             {
@@ -331,7 +253,43 @@ namespace TimeLord
             catch (System.Exception e) { TimeLord.Util.Log.NotifyBad(e.ToString()); Debug.PrintError(e.Message, e.StackTrace); Debug.WriteDebugLineOnScreen(e.ToString()); Debug.SetCrashReportCustomString(e.Message); Debug.SetCrashReportCustomStack(e.StackTrace); }
         }
 
+        private readonly List<Func<Harmony, bool>> _delayedPatches = new List<Func<Harmony, bool>>();
+
+        private void ReportSetupFailure(Exception error)
+        {
+            SetupExceptions.Add(error);
+            Util.Log.NotifyBad($"TimeLord compatibility error: {error}");
+        }
+
+        // Menu readiness replaces an arbitrary worker-thread delay. Never patch a live mission.
+        protected override void OnApplicationTick(float dt)
+        {
+            base.OnApplicationTick(dt);
+            ApplyDelayedPatches();
+        }
+
+        private void ApplyDelayedPatches()
+        {
+            if (!_loaded || Mission.Current != null || _delayedPatches.Count == 0) return;
+            bool succeeded = true;
+            foreach (var delayed in _delayedPatches)
+            {
+                try
+                {
+                    if (!delayed(Harmony)) throw new InvalidOperationException("TimeLord: delayed mission patch failed.");
+                }
+                catch (Exception e) { succeeded = false; ReportSetupFailure(e); }
+            }
+            _delayedPatches.Clear(); // Report once; do not retry an uncertain native patch.
+            DelayedPatchesComplete = succeeded;
+        }
+
+        public override void OnGameEnd(Game game)
+        {
+            CampaignCalendar.Reset();
+            base.OnGameEnd(game);
+        }
         private bool _loaded;
-        public static Harmony Harmony;
+        public static Harmony Harmony = null!;
     }
 }

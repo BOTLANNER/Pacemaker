@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -27,6 +28,13 @@ namespace TimeLord.Patches
                     //var type = Type.GetType("FamilyControl.FamilyControlBehavior", AssemblyResolver, TypeResolver, false, true);
                     if (FamilyControlBehaviorType != null)
                     {
+                        var map = AccessTools.Field(FamilyControlBehaviorType, "m_prePregnancyInfoMap");
+                        var info = familyControlAssembly.GetType("FamilyControl.FamilyControlBehavior+PrePregnancyInfo");
+                        if (map == null || !typeof(IDictionary).IsAssignableFrom(map.FieldType) || info == null ||
+                            AccessTools.Field(info, "m_pregnantDate")?.FieldType != typeof(CampaignTime) ||
+                            AccessTools.Field(info, "m_father")?.FieldType != typeof(Hero) ||
+                            AccessTools.Constructor(info, new[] { typeof(Hero), typeof(CampaignTime) }) == null)
+                            throw new MissingMemberException("TimeLord: unsupported FamilyControl pregnancy internals.");
                         harmony.Patch(AccessTools.Method(FamilyControlBehaviorType, "ShowAdultHeroes"), prefix: new HarmonyMethod(typeof(FamilyControlSupportPatch), nameof(ShowAdultHeroes)));
                         harmony.Patch(AccessTools.Method(FamilyControlBehaviorType, "RecordPrePregnantInfo"), prefix: new HarmonyMethod(typeof(FamilyControlSupportPatch), nameof(RecordPrePregnantInfo)));
                         harmony.Patch(AccessTools.Method(FamilyControlBehaviorType, "IsTimeToAddNewPregnant"), prefix: new HarmonyMethod(typeof(FamilyControlSupportPatch), nameof(IsTimeToAddNewPregnant)));
@@ -38,6 +46,9 @@ namespace TimeLord.Patches
             }
             catch (Exception e)
             {
+                PatchSafety.Rollback(harmony, typeof(FamilyControlSupportPatch));
+                familyControlAssembly = null;
+                Util.Log.NotifyBad($"TimeLord: FamilyControl adapter not installed: {e.Message}");
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 return false;
             }
@@ -45,6 +56,7 @@ namespace TimeLord.Patches
 
         public bool MenusInitialised(Harmony harmony)
         {
+            if (familyControlAssembly == null) return true;
             try
             {
                 if (familyControlAssembly != null)
@@ -65,13 +77,13 @@ namespace TimeLord.Patches
             return false;
         }
 
-        public static bool IsTimeToAddNewPregnant(ref object __instance, ref bool __result, ref Dictionary<Hero, object> ___m_prePregnancyInfoMap, Hero mother, Hero father = null)
+        public static bool IsTimeToAddNewPregnant(object __instance, ref bool __result, IDictionary ___m_prePregnancyInfoMap, Hero mother, Hero? father = null)
         {
             try
             {
                 bool result;
                 bool flag;
-                if ((mother == null ? false : ___m_prePregnancyInfoMap.ContainsKey(mother)))
+                if ((mother == null ? false : ___m_prePregnancyInfoMap.Contains(mother)))
                 {
                     Type mapInfoType = __instance.GetType().Assembly.GetType("FamilyControl.FamilyControlBehavior+PrePregnancyInfo");
                     var m_pregnantDateField = AccessTools.Field(mapInfoType, "m_pregnantDate");
@@ -115,13 +127,14 @@ namespace TimeLord.Patches
             }
         }
 
-        public static bool RecordPrePregnantInfo(ref object __instance, ref Dictionary<Hero, object> ___m_prePregnancyInfoMap, Hero sexPartner1, Hero sexPartner2)
+        public static bool RecordPrePregnantInfo(object __instance, IDictionary ___m_prePregnancyInfoMap, Hero sexPartner1, Hero sexPartner2)
         {
+            if (sexPartner1 == null || sexPartner2 == null) return true;
             bool runOriginalMethod;
             bool skip;
             try
             {
-                if ((double) MBRandom.RandomFloatRanged(0f, 1f) > (double) Config.PregnancyChance || sexPartner1 == null || sexPartner2 == null)
+                if ((double) MBRandom.RandomFloatRanged(0f, 1f) > (double) Config.PregnancyChance)
                 {
                     skip = true;
                 }
@@ -131,8 +144,8 @@ namespace TimeLord.Patches
                 }
                 if (!skip)
                 {
-                    Hero hero = null;
-                    Hero hero1 = null;
+                    Hero? hero = null;
+                    Hero? hero1 = null;
                     bool flag2 = (!sexPartner1.IsAlive || !sexPartner1.IsFemale || sexPartner1.IsPregnant ? false : (double) sexPartner1.Age > (double) Config.MinAge);
                     bool flag3 = (!sexPartner2.IsAlive || !sexPartner2.IsFemale || sexPartner2.IsPregnant ? false : (double) sexPartner2.Age > (double) Config.MinAge);
                     if (flag2 & flag3)
@@ -187,13 +200,13 @@ namespace TimeLord.Patches
                         hero = sexPartner2;
                         hero1 = sexPartner1;
                     }
-                    if ((hero == null ? false : hero1 != null))
+                    if (hero != null && hero1 != null)
                     {
                         CampaignTime campaignTime = CampaignTime.DaysFromNow((float) MBRandom.RandomInt(Config.MinPregnancyDelay, Config.MaxPregnancyDelay));
                         Type type = __instance.GetType().Assembly.GetType("FamilyControl.FamilyControlBehavior+PrePregnancyInfo");
                         FieldInfo fieldInfo = AccessTools.Field(type, "m_pregnantDate");
                         FieldInfo fieldInfo1 = AccessTools.Field(type, "m_father");
-                        if (!___m_prePregnancyInfoMap.ContainsKey(hero))
+                        if (!___m_prePregnancyInfoMap.Contains(hero))
                         {
                             ConstructorInfo constructorInfo = AccessTools.Constructor(type, new Type[] { typeof(Hero), typeof(CampaignTime) }, false);
                             ___m_prePregnancyInfoMap.Add(hero, constructorInfo.Invoke(new object[] { hero1, campaignTime }));
@@ -288,28 +301,10 @@ namespace TimeLord.Patches
 
         public static class Config
         {
-            static Type _realType;
-            static Assembly _familyControlAssembly;
-
-            static Config()
-            {
-                try
-                {
-                    _familyControlAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("FamilyControl, "));
-
-                    _realType = _familyControlAssembly.GetType("FamilyControl.Config", false, true);
-                }
-                catch (Exception e)
-                {
-                    Util.Log.NotifyBad(e.ToString());
-                    Debug.PrintError(e.Message, e.StackTrace);
-                    Debug.WriteDebugLineOnScreen(e.ToString());
-                    Debug.SetCrashReportCustomString(e.Message);
-                    Debug.SetCrashReportCustomStack(e.StackTrace);
-                }
-
-            }
-
+            private static readonly Type _realType = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "FamilyControl")?
+                .GetType("FamilyControl.Config", false, true)
+                ?? throw new TypeLoadException("TimeLord: FamilyControl.Config is unavailable.");
             internal static bool SameGenderInteractions => (bool) _realType.GetField("SameGenderInteractions", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 
             internal static bool IncestInteractions => (bool) _realType.GetField("IncestInteractions", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
@@ -336,7 +331,7 @@ namespace TimeLord.Patches
 
             internal static bool LesbianPregnancy => (bool) _realType.GetField("LesbianPregnancy", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 
-            internal static string LesbianPregnancyOn => _realType.GetField("LesbianPregnancyOn", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as string;
+            internal static string LesbianPregnancyOn => _realType.GetField("LesbianPregnancyOn", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as string ?? string.Empty;
 
             internal static bool DisableDefaultPregnancyMethod => (bool) _realType.GetField("DisableDefaultPregnancyMethod", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 
@@ -344,7 +339,7 @@ namespace TimeLord.Patches
 
             internal static bool BlackScreenEffect => (bool) _realType.GetField("BlackScreenEffect", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 
-            internal static string SoundSet => _realType.GetField("SoundSet", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as string;
+            internal static string SoundSet => _realType.GetField("SoundSet", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as string ?? string.Empty;
 
             internal static bool NPCSelfAbortionAllow => (bool) _realType.GetField("NPCSelfAbortionAllow", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
 

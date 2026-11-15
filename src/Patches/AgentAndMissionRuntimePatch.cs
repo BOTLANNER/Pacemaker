@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -14,10 +14,10 @@ namespace TimeLord.Patches
     public class AgentAndMissionRuntimePatch : IOptionalPatch
     {
         // Mission
-        static MethodInfo BuildAgentMethod = AccessTools.Method(typeof(Mission), nameof(BuildAgent));
+        static readonly MethodInfo BuildAgentMethod = AccessTools.Method(typeof(Mission), nameof(BuildAgent), new[] { typeof(Agent), typeof(AgentBuildData) });
 
         // Agent
-        static MethodInfo UpdateSpawnEquipmentAndRefreshVisualsMethod = AccessTools.Method(typeof(Agent), nameof(UpdateSpawnEquipmentAndRefreshVisuals));
+        static readonly MethodInfo UpdateSpawnEquipmentAndRefreshVisualsMethod = AccessTools.Method(typeof(Agent), nameof(UpdateSpawnEquipmentAndRefreshVisuals), new[] { typeof(TaleWorlds.Core.Equipment) });
 
         public Func<Harmony, bool>? DelayedPatch()
         {
@@ -33,6 +33,7 @@ namespace TimeLord.Patches
                 }
                 catch (System.Exception e)
                 {
+                    PatchSafety.Rollback(harmony, typeof(AgentAndMissionRuntimePatch));
                     Util.EventTracer.Trace(new List<string> { "UpdateSpawnEquipmentAndRefreshVisuals ", e.Message, e.StackTrace });
                     TimeLord.Util.Log.NotifyBad(e.ToString());
                     Debug.PrintError(e.Message, e.StackTrace);
@@ -56,18 +57,13 @@ namespace TimeLord.Patches
 
         public bool TryPatch(Harmony harmony)
         {
-            if (BuildAgentMethod == null)
-            {
-                return false;
-            }
-            if (UpdateSpawnEquipmentAndRefreshVisualsMethod == null)
-            {
-                return false;
-            }
+            if (BuildAgentMethod == null || UpdateSpawnEquipmentAndRefreshVisualsMethod == null ||
+                AccessTools.Method(typeof(Agent), "SetInitialAgentScale", new[] { typeof(float) }) == null)
+                throw new MissingMethodException("TimeLord: required agent visual methods are unavailable.");
             return true;
         }
 
-        public static void UpdateSpawnEquipmentAndRefreshVisuals(ref Agent __instance)
+        public static void UpdateSpawnEquipmentAndRefreshVisuals(Agent __instance)
         {
             try
             {
@@ -90,7 +86,7 @@ namespace TimeLord.Patches
             }
         }
 
-        private static void BuildAgent(ref Mission __instance, ref int ____agentCreationIndex, ref List<Agent> ____activeAgents, ref List<Agent> ____allAgents, Agent agent, AgentBuildData agentBuildData)
+        private static void BuildAgent(Agent agent)
         {
             try
             {

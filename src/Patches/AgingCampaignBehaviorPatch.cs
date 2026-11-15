@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,11 +26,25 @@ namespace TimeLord.Patches
         }
 
         private delegate void IsItTimeOfDeathDelegate(AgingCampaignBehavior instance, Hero hero);
-        private static readonly MethodInfo IsItTimeOfDeathMethod = AccessTools.Method(typeof(AgingCampaignBehavior), "IsItTimeOfDeath");
+        private static readonly MethodInfo IsItTimeOfDeathMethod = AccessTools.Method(typeof(AgingCampaignBehavior), "IsItTimeOfDeath", new[] { typeof(Hero) });
+        private static readonly MethodInfo KillMainHeroWithIllnessMethod = AccessTools.Method(typeof(AgingCampaignBehavior), "KillMainHeroWithIllness", Type.EmptyTypes);
+
+        [HarmonyPrepare]
+        private static bool Prepare()
+        {
+            var type = typeof(AgingCampaignBehavior);
+            bool valid = IsItTimeOfDeathMethod != null && KillMainHeroWithIllnessMethod != null &&
+                AccessTools.Field(type, "_extraLivesContainer")?.FieldType == typeof(Dictionary<Hero, int>) &&
+                AccessTools.Field(type, "_heroesYoungerThanHeroComesOfAge")?.FieldType == typeof(Dictionary<Hero, int>) &&
+                AccessTools.Field(type, "_gameStartDay")?.FieldType == typeof(int);
+            if (!valid) throw new MissingMemberException("TimeLord: aging internals do not match; aging patch not installed.");
+            return true;
+        }
 
 
         [HarmonyPrefix]
         [HarmonyPriority(Priority.High)]
+        [HarmonyAfter("vampireplayer.immortality")]
         [HarmonyPatch("DailyTickHero")]
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool DailyTickHero(Hero hero,
@@ -40,8 +54,12 @@ namespace TimeLord.Patches
                                           int ____gameStartDay)
         {
 
+            bool mutationStarted = false;
             try
             {
+                if (Main.Settings == null || hero == null || Campaign.Current == null ||
+                    ____extraLivesContainer == null || ____heroesYoungerThanHeroComesOfAge == null)
+                    return true;
                 bool toDays = (int) CampaignTime.Now.ToDays == ____gameStartDay;
                 if (CampaignOptions.IsLifeDeathCycleDisabled || hero.IsTemplate || toDays)
                 {
@@ -50,7 +68,9 @@ namespace TimeLord.Patches
 
                 if (hero.IsAlive && hero.CanDie(KillCharacterAction.KillCharacterActionDetail.DiedOfOldAge))
                 {
+                    mutationStarted = true;
                     if (hero.DeathMark != KillCharacterAction.KillCharacterActionDetail.None
+                    && hero.DeathMark != KillCharacterAction.KillCharacterActionDetail.ExecutionAfterMapEvent
                     && (hero.PartyBelongedTo is null
                         || (hero.PartyBelongedTo.MapEvent is null && hero.PartyBelongedTo.SiegeEvent is null)))
                     {
@@ -63,6 +83,7 @@ namespace TimeLord.Patches
                 }
 
 
+                mutationStarted = true;
                 bool adultAafEnabled = Main.Settings!.AdultAgeFactor > 1.02f;
                 bool childAafEnabled = Main.Settings!.ChildAgeFactor > 1.02f;
 
@@ -139,9 +160,8 @@ namespace TimeLord.Patches
                                 return false;
                             }
 
-                            Campaign.Current.TimeControlMode = CampaignTimeControlMode.Stop;
-                            Hero.MainHero.AddDeathMark(null, KillCharacterAction.KillCharacterActionDetail.DiedOfOldAge);
-                            KillCharacterAction.ApplyByOldAge(Hero.MainHero, true);
+                            // Keep the game's helper and other mods' illness protection in the call path.
+                            KillMainHeroWithIllnessMethod.Invoke(__instance, Array.Empty<object>());
                         }
                     }
                 }
@@ -155,7 +175,8 @@ namespace TimeLord.Patches
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 Debug.SetCrashReportCustomString(e.Message);
                 Debug.SetCrashReportCustomStack(e.StackTrace);
-                return true;
+                // Never replay the vanilla daily tick after partial birthday/death mutations.
+                return !mutationStarted;
             }
         }
 

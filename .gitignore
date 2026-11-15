@@ -87,3 +87,6 @@ ipch/
 *.vspx
 *.sap
 /ref
+
+# Local compatibility validation evidence
+/validation/

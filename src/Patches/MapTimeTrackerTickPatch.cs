@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -13,7 +13,7 @@ namespace TimeLord.Patches
     public sealed class MapTimeTrackerPatch : IOptionalPatch
     {
         private static readonly System.Type MapTimeTrackerType = typeof(Campaign).Assembly.GetType("TaleWorlds.CampaignSystem.MapTimeTracker");
-        private static readonly MethodInfo TickMethod = AccessTools.Method(MapTimeTrackerType, nameof(Tick));
+        private static readonly MethodInfo TickMethod = MapTimeTrackerType == null ? null! : AccessTools.Method(MapTimeTrackerType, nameof(Tick), new[] { typeof(float) });
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Tick(ref float seconds)
@@ -46,7 +46,7 @@ namespace TimeLord.Patches
         {
             try
             {
-                harmony.Patch(TickMethod, prefix: new HarmonyMethod(this.GetType(), nameof(Tick)));
+                PatchSafety.PrefixOnce(harmony, TickMethod, GetType(), nameof(Tick));
                 return true;
             }
             catch(Exception e)
@@ -56,7 +56,7 @@ namespace TimeLord.Patches
                 Debug.WriteDebugLineOnScreen(e.ToString());
                 Debug.SetCrashReportCustomString(e.Message);
                 Debug.SetCrashReportCustomStack(e.StackTrace);
-                throw e;
+                throw;
             }
         }
     }

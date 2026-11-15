@@ -1,4 +1,4 @@
-﻿<Module>
+<Module>
   <Name value="TimeLord"/>
   <Id value="TimeLord"/>
   <Version value="v3.0.2.0"/>
@@ -11,20 +11,21 @@
   <ModuleType value="Community" />
   <UpdateInfo value="NexusMods:4621" />
   <DependedModules>
-    <DependedModule Id="Bannerlord.MBOptionScreen" DependentVersion="v5.11.3" />
+    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.2.248" />
+    <DependedModule Id="Bannerlord.MBOptionScreen" DependentVersion="v5.13.1" />
     <DependedModule Id="Native"/>
     <DependedModule Id="SandBoxCore"/>
     <DependedModule Id="Sandbox"/>
     <DependedModule Id="StoryMode" />
   </DependedModules>
   <DependedModuleMetadatas>
-    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.2"  optional="true" />
-    <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" version="v5.11.3" />
-    <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="1.0.0.*" />
-    <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="1.0.0.*" />
-    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="1.0.0.*" />
-    <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="1.0.0.*" />
-    <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.2.248" />
+    <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" version="v5.13.1" />
+    <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.5.7" />
+    <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.5.7" />
+    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.5.7" />
+    <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.5.7" />
+    <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.5.7" optional="true" />
   </DependedModuleMetadatas>
   <SubModules>
     <SubModule>
