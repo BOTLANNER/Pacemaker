@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 
 using HarmonyLib;
@@ -34,32 +34,32 @@ namespace TimeLord.Patches
                 Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 foreach (var assembly in assemblies)
                 {
-                    foreach (var type in assembly.GetTypes())
+                    foreach (var type in PatchSafety.LoadableTypes(assembly))
                     {
                         try
                         {
-                            if (type.IsSubclassOf(baseType))
+                            if (!type.IsAbstract && type.IsSubclassOf(baseType))
                             {
 
                                 var campaignTimeModelType = type;
                                 if (campaignTimeModelType != null)
                                 {
                                     MethodInfo seasonsInYearGetter = AccessTools.PropertyGetter(campaignTimeModelType, "SeasonsInYear");
-                                    if (seasonsInYearGetter.DeclaringType == campaignTimeModelType)
+                                    if (seasonsInYearGetter != null && !seasonsInYearGetter.IsAbstract && seasonsInYearGetter.DeclaringType == campaignTimeModelType)
                                     {
-                                        harmony.Patch(seasonsInYearGetter, prefix: new HarmonyMethod(typeof(ForceCampaignTimeModelPatch), nameof(ForceCampaignTimeModelPatch.SeasonsInYear)));
+                                        PatchSafety.PrefixOnce(harmony, seasonsInYearGetter, typeof(ForceCampaignTimeModelPatch), nameof(SeasonsInYear));
                                     }
 
                                     MethodInfo weeksInSeasonGetter = AccessTools.PropertyGetter(campaignTimeModelType, "WeeksInSeason");
-                                    if (weeksInSeasonGetter.DeclaringType == campaignTimeModelType)
+                                    if (weeksInSeasonGetter != null && !weeksInSeasonGetter.IsAbstract && weeksInSeasonGetter.DeclaringType == campaignTimeModelType)
                                     {
-                                        harmony.Patch(weeksInSeasonGetter, prefix: new HarmonyMethod(typeof(ForceCampaignTimeModelPatch), nameof(ForceCampaignTimeModelPatch.WeeksInSeason)));
+                                        PatchSafety.PrefixOnce(harmony, weeksInSeasonGetter, typeof(ForceCampaignTimeModelPatch), nameof(WeeksInSeason));
                                     }
 
                                     MethodInfo daysInWeekGetter = AccessTools.PropertyGetter(campaignTimeModelType, "DaysInWeek");
-                                    if (daysInWeekGetter.DeclaringType == campaignTimeModelType)
+                                    if (daysInWeekGetter != null && !daysInWeekGetter.IsAbstract && daysInWeekGetter.DeclaringType == campaignTimeModelType)
                                     {
-                                        harmony.Patch(daysInWeekGetter, prefix: new HarmonyMethod(typeof(ForceCampaignTimeModelPatch), nameof(ForceCampaignTimeModelPatch.DaysInWeek)));
+                                        PatchSafety.PrefixOnce(harmony, daysInWeekGetter, typeof(ForceCampaignTimeModelPatch), nameof(DaysInWeek));
                                     }
                                 }
                             }
@@ -82,17 +82,20 @@ namespace TimeLord.Patches
 
         private static bool SeasonsInYear(ref int __result)
         {
-            __result = Main.Settings!.SeasonsInYear;
+            if (Main.Settings == null) return true;
+            __result = CampaignCalendar.Seasons;
             return false;
         }
         private static bool WeeksInSeason(ref int __result)
         {
-            __result = Main.Settings!.WeeksInSeason;
+            if (Main.Settings == null) return true;
+            __result = CampaignCalendar.Weeks;
             return false;
         }
         private static bool DaysInWeek(ref int __result)
         {
-            __result = Main.Settings!.DaysInWeek;
+            if (Main.Settings == null) return true;
+            __result = CampaignCalendar.Days;
             return false;
         }
 

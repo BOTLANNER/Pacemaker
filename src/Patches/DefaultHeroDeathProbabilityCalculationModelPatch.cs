@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using HarmonyLib;
 
@@ -12,12 +12,14 @@ namespace TimeLord.Patches
     public class DefaultHeroDeathProbabilityCalculationModelPatch
     {
         [HarmonyPriority(HarmonyLib.Priority.HigherThanNormal)]
+        [HarmonyAfter("vampireplayer.immortality")]
         [HarmonyPatch(nameof(CalculateHeroDeathProbabilityInternal))]
         [HarmonyPrefix]
         private static bool CalculateHeroDeathProbabilityInternal(ref float __result, Hero hero)
         {
             try
             {
+                if (Main.Settings == null || Campaign.Current == null || hero == null) return true;
                 float single = 0f;
                 if (!CampaignOptions.IsLifeDeathCycleDisabled)
                 {
@@ -32,6 +34,9 @@ namespace TimeLord.Patches
                             // Transform for TimeLord age factor
                             age *= Main.Settings!.AdultAgeFactor;
 
+                            if (float.IsNaN(age) || float.IsInfinity(age) || CampaignTime.DaysInYear <= 0) return true;
+                            // Keep the existing curve in its valid domain; avoid fractional powers of a negative base.
+                            age = Math.Max(0f, Math.Min(1f, age));
                             float single1 = 1f - MathF.Pow(1f - age, 1f / (float) CampaignTime.DaysInYear);
                             single += single1;
                         }

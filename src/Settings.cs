@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using MCM.Abstractions.Attributes;
 using MCM.Abstractions.Attributes.v2;
@@ -17,11 +17,11 @@ namespace TimeLord
         public override string FolderName => Main.Name;
         public override string FormatType => "json";
 
-        private const string DaysInWeek_Hint = "Days Per Week. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 7 ]";
+        private const string DaysInWeek_Hint = "Days Per Week. NOTE: Once you start a game, keep this value unchanged for that save, including after restarting. Session changes apply on the next campaign initialization. [ Default: 7 ]";
 
-        private const string WeeksInSeason_Hint = "Weeks Per Season. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 3 ]";
+        private const string WeeksInSeason_Hint = "Weeks Per Season. NOTE: Once you start a game, keep this value unchanged for that save, including after restarting. Session changes apply on the next campaign initialization. [ Default: 3 ]";
 
-        private const string SeasonsInYear_Hint = "Seasons Per Year. NOTE: Once you start a game, this value is permanently set for that campaign. [ Default: 4 ]";
+        private const string SeasonsInYear_Hint = "Seasons Per Year. NOTE: Once you start a game, keep this value unchanged for that save, including after restarting. Session changes apply on the next campaign initialization. [ Default: 4 ]";
 
         private const string TimeMultiplier_Hint = "Multiplies the rate at which campaign time passes. " +
             "Note that the same general pace is maintained: days simply pass more quickly/slowly. [ Default: 1.75 ]";
@@ -169,15 +169,15 @@ namespace TimeLord
 
         private const string AlleyGangMemberMaxAge_Hint = "Maximum age for alley gang members. [ Default: 40 ]";
 
-        [SettingPropertyInteger("Days Per Week", 1, 90, HintText = DaysInWeek_Hint, RequireRestart = false, Order = 0)]
+        [SettingPropertyInteger("Days Per Week", 1, 90, HintText = DaysInWeek_Hint, RequireRestart = true, Order = 0)]
         [SettingPropertyGroup("General Settings", GroupOrder = 0)]
         public int DaysInWeek { get; set; } = 7;
 
-        [SettingPropertyInteger("Weeks Per Season", 1, 90, HintText = WeeksInSeason_Hint, RequireRestart = false, Order = 0)]
+        [SettingPropertyInteger("Weeks Per Season", 1, 90, HintText = WeeksInSeason_Hint, RequireRestart = true, Order = 0)]
         [SettingPropertyGroup("General Settings")]
         public int WeeksInSeason { get; set; } = 3;
 
-        [SettingPropertyInteger("Seasons Per Year", 1, 90, HintText = SeasonsInYear_Hint, RequireRestart = false, Order = 0)]
+        [SettingPropertyInteger("Seasons Per Year", 1, 90, HintText = SeasonsInYear_Hint, RequireRestart = true, Order = 0)]
         [SettingPropertyGroup("General Settings")]
         public int SeasonsInYear { get; set; } = 4;
 
@@ -201,7 +201,7 @@ namespace TimeLord
         [SettingPropertyGroup("General Settings")]
         public float ChildAgeFactor { get; set; } = 2f;
 
-        [SettingPropertyFloatingInteger("Custom Skill Growth (Children)", 1f, 10f, "#0%", HintText = CustomSkillGrowth_Hint, RequireRestart = true, Order = 7)]
+        [SettingPropertyBool("Custom Skill Growth (Children)", HintText = CustomSkillGrowth_Hint, RequireRestart = true, Order = 7)]
         [SettingPropertyGroup("General Settings")]
         public bool CustomSkillGrowth { get; set; } = false;
 

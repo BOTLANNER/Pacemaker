@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
+    <UseSharedCompilation>false</UseSharedCompilation>
+    <DnlibPath Condition="'$(DnlibPath)' == ''">$(USERPROFILE)\.nuget\packages\dnlib\4.5.0\lib\net45\dnlib.dll</DnlibPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib"><HintPath>$(DnlibPath)</HintPath></Reference>
+    <Reference Include="$(GameFolder)\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\*.dll" />
+    <Compile Include="../../src/PatchSafety.cs" Link="Production/PatchSafety.cs" />
+    <Compile Include="../../src/CampaignCalendar.cs" Link="Production/CampaignCalendar.cs" />
+    <Compile Include="../../src/PostCharacterCreationBehaviour.cs" Link="Production/PostCharacterCreationBehaviour.cs" />
+  </ItemGroup>
+</Project>

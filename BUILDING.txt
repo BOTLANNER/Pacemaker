@@ -1,0 +1,32 @@
+Building and checking TimeLord for Bannerlord 1.5.7
+
+Prerequisites (Windows x64):
+- A .NET SDK supporting C# 9 and the .NET Framework 4.7.2 targeting pack.
+- Bannerlord 1.5.7 and its managed assemblies.
+- Installed Harmony (tested module 2.4.2.248, assembly 2.4.2.0) and MCM 5.13.1.
+  Install MCM's own dependencies as required by its module manifest.
+- For the validation harness only: dnlib 4.5.0, net45 assembly.
+
+Set BANNERLORD_GAME_DIR to your game installation, then run from the repository:
+  dotnet build src/TimeLord.sln -c Release -p:Platform=x64
+
+Alternatively pass the installation explicitly as an MSBuild GameFolder property.
+Build outputs stay in src/bin/x64/Release/net472. The build stages SubModule.xml
+there and never installs files into the game. Runtime dependencies are not bundled.
+Existing stable/beta project configurations remain available.
+
+Run the technical checks in PowerShell:
+  ./tools/Validate.ps1 -GameFolder $env:BANNERLORD_GAME_DIR -DnlibPath $env:DNLIB_PATH
+
+DNLIB_PATH must point to the dnlib assembly. If -DnlibPath is omitted, the harness
+uses dnlib 4.5.0 from the current user's NuGet cache. The script builds the mod and
+test executable, checks metadata/Harmony bindings and runs test doubles. It writes
+ignored local evidence under validation/ and checks that inspected game DLLs and
+manifests remain unchanged. No game is launched and no saves are read or modified.
+The current 126-check suite requires War Sails (NavalDLC) for naval metadata checks;
+War Sails and Vampire Player are not required dependencies of TimeLord itself.
+Vampire Player ordering is tested with a simulated protection prefix, not its DLL.
+
+Keep the original calendar dimensions when loading an existing save. The active
+campaign calendar is frozen within a session, but calendar history is not persisted
+per save. Compilation and these checks do not establish runtime/save compatibility.
